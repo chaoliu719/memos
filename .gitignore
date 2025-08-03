@@ -19,3 +19,6 @@ dist
 
 # VSCode settings
 .vscode
+
+# Dev data
+data
