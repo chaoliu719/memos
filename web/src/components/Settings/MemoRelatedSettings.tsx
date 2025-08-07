@@ -41,7 +41,13 @@ const MemoRelatedSettings = observer(() => {
       return;
     }
 
-    updatePartialSetting({ nsfwTags: uniq([...memoRelatedSetting.nsfwTags, editingNsfwTag.trim()]) });
+    const existingNames = memoRelatedSetting.nsfwTags.map(tag => tag.name);
+    const newTags = [...memoRelatedSetting.nsfwTags];
+    const trimmedTag = editingNsfwTag.trim();
+    if (!existingNames.includes(trimmedTag)) {
+      newTags.push({ name: trimmedTag });
+    }
+    updatePartialSetting({ nsfwTags: newTags });
     setEditingNsfwTag("");
   };
 
@@ -151,11 +157,11 @@ const MemoRelatedSettings = observer(() => {
         <div className="mt-2 w-full flex flex-row flex-wrap gap-1">
           {memoRelatedSetting.nsfwTags.map((nsfwTag) => {
             return (
-              <Badge key={nsfwTag} variant="outline" className="flex items-center gap-1">
-                {nsfwTag}
+              <Badge key={nsfwTag.name} variant="outline" className="flex items-center gap-1">
+                {nsfwTag.name}
                 <span
                   className="cursor-pointer text-muted-foreground hover:text-primary"
-                  onClick={() => updatePartialSetting({ nsfwTags: memoRelatedSetting.nsfwTags.filter((r) => r !== nsfwTag) })}
+                  onClick={() => updatePartialSetting({ nsfwTags: memoRelatedSetting.nsfwTags.filter((r) => r.name !== nsfwTag.name) })}
                 >
                   <X className="w-4 h-4" />
                 </span>

@@ -17,13 +17,13 @@ func TestConvertExprToSQL(t *testing.T) {
 	}{
 		{
 			filter: `tag in ["tag1", "tag2"]`,
-			want:   "(memo.payload->'tags' @> jsonb_build_array($1::json) OR memo.payload->'tags' @> jsonb_build_array($2::json))",
-			args:   []any{`"tag1"`, `"tag2"`},
+			want:   "(EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = $1) OR EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = $2))",
+			args:   []any{"tag1", "tag2"},
 		},
 		{
 			filter: `!(tag in ["tag1", "tag2"])`,
-			want:   "NOT ((memo.payload->'tags' @> jsonb_build_array($1::json) OR memo.payload->'tags' @> jsonb_build_array($2::json)))",
-			args:   []any{`"tag1"`, `"tag2"`},
+			want:   "NOT ((EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = $1) OR EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = $2)))",
+			args:   []any{"tag1", "tag2"},
 		},
 		{
 			filter: `content.contains("memos")`,
@@ -42,8 +42,8 @@ func TestConvertExprToSQL(t *testing.T) {
 		},
 		{
 			filter: `tag in ['tag1'] || content.contains('hello')`,
-			want:   "(memo.payload->'tags' @> jsonb_build_array($1::json) OR memo.content ILIKE $2)",
-			args:   []any{`"tag1"`, "%hello%"},
+			want:   "(EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = $1) OR memo.content ILIKE $2)",
+			args:   []any{"tag1", "%hello%"},
 		},
 		{
 			filter: `1`,
@@ -107,7 +107,7 @@ func TestConvertExprToSQL(t *testing.T) {
 		},
 		{
 			filter: `"work" in tags`,
-			want:   "memo.payload->'tags' @> jsonb_build_array($1::json)",
+			want:   "EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = $1)",
 			args:   []any{"work"},
 		},
 		{

@@ -684,7 +684,7 @@ type WorkspaceMemoRelatedSetting struct {
 	// enable_blur_nsfw_content enables blurring of content marked as not safe for work (NSFW).
 	EnableBlurNsfwContent bool `protobuf:"varint,9,opt,name=enable_blur_nsfw_content,json=enableBlurNsfwContent,proto3" json:"enable_blur_nsfw_content,omitempty"`
 	// nsfw_tags is the list of tags that mark content as NSFW for blurring.
-	NsfwTags      []string `protobuf:"bytes,10,rep,name=nsfw_tags,json=nsfwTags,proto3" json:"nsfw_tags,omitempty"`
+	NsfwTags      []*TagNode `protobuf:"bytes,10,rep,name=nsfw_tags,json=nsfwTags,proto3" json:"nsfw_tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -775,7 +775,7 @@ func (x *WorkspaceMemoRelatedSetting) GetEnableBlurNsfwContent() bool {
 	return false
 }
 
-func (x *WorkspaceMemoRelatedSetting) GetNsfwTags() []string {
+func (x *WorkspaceMemoRelatedSetting) GetNsfwTags() []*TagNode {
 	if x != nil {
 		return x.NsfwTags
 	}
@@ -786,7 +786,7 @@ var File_store_workspace_setting_proto protoreflect.FileDescriptor
 
 const file_store_workspace_setting_proto_rawDesc = "" +
 	"\n" +
-	"\x1dstore/workspace_setting.proto\x12\vmemos.store\"\x9a\x03\n" +
+	"\x1dstore/workspace_setting.proto\x12\vmemos.store\x1a\x0fstore/tag.proto\"\x9a\x03\n" +
 	"\x10WorkspaceSetting\x122\n" +
 	"\x03key\x18\x01 \x01(\x0e2 .memos.store.WorkspaceSettingKeyR\x03key\x12I\n" +
 	"\rbasic_setting\x18\x02 \x01(\v2\".memos.store.WorkspaceBasicSettingH\x00R\fbasicSetting\x12O\n" +
@@ -832,7 +832,7 @@ const file_store_workspace_setting_proto_rawDesc = "" +
 	"\bendpoint\x18\x03 \x01(\tR\bendpoint\x12\x16\n" +
 	"\x06region\x18\x04 \x01(\tR\x06region\x12\x16\n" +
 	"\x06bucket\x18\x05 \x01(\tR\x06bucket\x12$\n" +
-	"\x0euse_path_style\x18\x06 \x01(\bR\fusePathStyle\"\xe1\x03\n" +
+	"\x0euse_path_style\x18\x06 \x01(\bR\fusePathStyle\"\xf7\x03\n" +
 	"\x1bWorkspaceMemoRelatedSetting\x12<\n" +
 	"\x1adisallow_public_visibility\x18\x01 \x01(\bR\x18disallowPublicVisibility\x127\n" +
 	"\x18display_with_update_time\x18\x02 \x01(\bR\x15displayWithUpdateTime\x120\n" +
@@ -841,9 +841,9 @@ const file_store_workspace_setting_proto_rawDesc = "" +
 	"\x13enable_link_preview\x18\x05 \x01(\bR\x11enableLinkPreview\x12\x1c\n" +
 	"\treactions\x18\a \x03(\tR\treactions\x12<\n" +
 	"\x1adisable_markdown_shortcuts\x18\b \x01(\bR\x18disableMarkdownShortcuts\x127\n" +
-	"\x18enable_blur_nsfw_content\x18\t \x01(\bR\x15enableBlurNsfwContent\x12\x1b\n" +
+	"\x18enable_blur_nsfw_content\x18\t \x01(\bR\x15enableBlurNsfwContent\x121\n" +
 	"\tnsfw_tags\x18\n" +
-	" \x03(\tR\bnsfwTags*s\n" +
+	" \x03(\v2\x14.memos.store.TagNodeR\bnsfwTags*s\n" +
 	"\x13WorkspaceSettingKey\x12%\n" +
 	"!WORKSPACE_SETTING_KEY_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05BASIC\x10\x01\x12\v\n" +
@@ -876,6 +876,7 @@ var file_store_workspace_setting_proto_goTypes = []any{
 	(*WorkspaceStorageSetting)(nil),          // 6: memos.store.WorkspaceStorageSetting
 	(*StorageS3Config)(nil),                  // 7: memos.store.StorageS3Config
 	(*WorkspaceMemoRelatedSetting)(nil),      // 8: memos.store.WorkspaceMemoRelatedSetting
+	(*TagNode)(nil),                          // 9: memos.store.TagNode
 }
 var file_store_workspace_setting_proto_depIdxs = []int32{
 	0, // 0: memos.store.WorkspaceSetting.key:type_name -> memos.store.WorkspaceSettingKey
@@ -886,11 +887,12 @@ var file_store_workspace_setting_proto_depIdxs = []int32{
 	5, // 5: memos.store.WorkspaceGeneralSetting.custom_profile:type_name -> memos.store.WorkspaceCustomProfile
 	1, // 6: memos.store.WorkspaceStorageSetting.storage_type:type_name -> memos.store.WorkspaceStorageSetting.StorageType
 	7, // 7: memos.store.WorkspaceStorageSetting.s3_config:type_name -> memos.store.StorageS3Config
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	9, // 8: memos.store.WorkspaceMemoRelatedSetting.nsfw_tags:type_name -> memos.store.TagNode
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_store_workspace_setting_proto_init() }
@@ -898,6 +900,7 @@ func file_store_workspace_setting_proto_init() {
 	if File_store_workspace_setting_proto != nil {
 		return
 	}
+	file_store_tag_proto_init()
 	file_store_workspace_setting_proto_msgTypes[0].OneofWrappers = []any{
 		(*WorkspaceSetting_BasicSetting)(nil),
 		(*WorkspaceSetting_GeneralSetting)(nil),

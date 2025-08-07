@@ -7,6 +7,7 @@ import "google/api/client.proto";
 import "google/api/field_behavior.proto";
 import "google/api/resource.proto";
 import "google/protobuf/field_mask.proto";
+import "store/tag.proto";
 
 option go_package = "gen/api/v1";
 
@@ -169,7 +170,7 @@ message WorkspaceSetting {
     // enable_blur_nsfw_content enables blurring of content marked as not safe for work (NSFW).
     bool enable_blur_nsfw_content = 9;
     // nsfw_tags is the list of tags that mark content as NSFW for blurring.
-    repeated string nsfw_tags = 10;
+    repeated memos.store.TagNode nsfw_tags = 10;
   }
 }
 

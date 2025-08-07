@@ -33,14 +33,14 @@ var SQLTemplates = map[string]SQLTemplate{
 		PostgreSQL: "jsonb_array_length(COALESCE(memo.payload->'tags', '[]'::jsonb))",
 	},
 	"json_contains_element": {
-		SQLite:     "JSON_EXTRACT(`memo`.`payload`, '$.tags') LIKE ?",
-		MySQL:      "JSON_CONTAINS(JSON_EXTRACT(`memo`.`payload`, '$.tags'), ?)",
-		PostgreSQL: "memo.payload->'tags' @> jsonb_build_array(?)",
+		SQLite:     "EXISTS(SELECT 1 FROM JSON_EACH(JSON_EXTRACT(`memo`.`payload`, '$.tags')) WHERE JSON_EXTRACT(value, '$.name') LIKE ?)",
+		MySQL:      "JSON_SEARCH(JSON_EXTRACT(`memo`.`payload`, '$.tags[*].name'), 'one', ?) IS NOT NULL",
+		PostgreSQL: "EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = ?)",
 	},
 	"json_contains_tag": {
-		SQLite:     "JSON_EXTRACT(`memo`.`payload`, '$.tags') LIKE ?",
-		MySQL:      "JSON_CONTAINS(JSON_EXTRACT(`memo`.`payload`, '$.tags'), ?)",
-		PostgreSQL: "memo.payload->'tags' @> jsonb_build_array(?)",
+		SQLite:     "EXISTS(SELECT 1 FROM JSON_EACH(JSON_EXTRACT(`memo`.`payload`, '$.tags')) WHERE JSON_EXTRACT(value, '$.name') LIKE ?)",
+		MySQL:      "JSON_SEARCH(JSON_EXTRACT(`memo`.`payload`, '$.tags[*].name'), 'one', ?) IS NOT NULL",
+		PostgreSQL: "EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = ?)",
 	},
 	"boolean_true": {
 		SQLite:     "JSON_EXTRACT(`memo`.`payload`, '$.property.hasTaskList') = 1",

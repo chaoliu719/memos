@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package memos.store;
 
+import "store/tag.proto";
+
 option go_package = "gen/store";
 
 enum WorkspaceSettingKey {
@@ -114,5 +116,5 @@ message WorkspaceMemoRelatedSetting {
   // enable_blur_nsfw_content enables blurring of content marked as not safe for work (NSFW).
   bool enable_blur_nsfw_content = 9;
   // nsfw_tags is the list of tags that mark content as NSFW for blurring.
-  repeated string nsfw_tags = 10;
+  repeated TagNode nsfw_tags = 10;
 }

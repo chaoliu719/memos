@@ -123,7 +123,7 @@ func (s *APIV1Service) GetUserStats(ctx context.Context, request *v1pb.GetUserSt
 		// Count different memo types based on content.
 		if memo.Payload != nil {
 			for _, tag := range memo.Payload.Tags {
-				tagCount[tag]++
+				tagCount[tag.Name]++
 			}
 			if memo.Payload.Property != nil {
 				if memo.Payload.Property.HasLink {

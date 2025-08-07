@@ -25,7 +25,7 @@ type MemoPayload struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Property      *MemoPayload_Property  `protobuf:"bytes,1,opt,name=property,proto3" json:"property,omitempty"`
 	Location      *MemoPayload_Location  `protobuf:"bytes,2,opt,name=location,proto3" json:"location,omitempty"`
-	Tags          []string               `protobuf:"bytes,3,rep,name=tags,proto3" json:"tags,omitempty"`
+	Tags          []*TagNode             `protobuf:"bytes,3,rep,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,7 +74,7 @@ func (x *MemoPayload) GetLocation() *MemoPayload_Location {
 	return nil
 }
 
-func (x *MemoPayload) GetTags() []string {
+func (x *MemoPayload) GetTags() []*TagNode {
 	if x != nil {
 		return x.Tags
 	}
@@ -223,11 +223,11 @@ var File_store_memo_proto protoreflect.FileDescriptor
 
 const file_store_memo_proto_rawDesc = "" +
 	"\n" +
-	"\x10store/memo.proto\x12\vmemos.store\"\xc0\x03\n" +
+	"\x10store/memo.proto\x12\vmemos.store\x1a\x0fstore/tag.proto\"\xd6\x03\n" +
 	"\vMemoPayload\x12=\n" +
 	"\bproperty\x18\x01 \x01(\v2!.memos.store.MemoPayload.PropertyR\bproperty\x12=\n" +
-	"\blocation\x18\x02 \x01(\v2!.memos.store.MemoPayload.LocationR\blocation\x12\x12\n" +
-	"\x04tags\x18\x03 \x03(\tR\x04tags\x1a\xb6\x01\n" +
+	"\blocation\x18\x02 \x01(\v2!.memos.store.MemoPayload.LocationR\blocation\x12(\n" +
+	"\x04tags\x18\x03 \x03(\v2\x14.memos.store.TagNodeR\x04tags\x1a\xb6\x01\n" +
 	"\bProperty\x12\x19\n" +
 	"\bhas_link\x18\x01 \x01(\bR\ahasLink\x12\"\n" +
 	"\rhas_task_list\x18\x02 \x01(\bR\vhasTaskList\x12\x19\n" +
@@ -259,15 +259,17 @@ var file_store_memo_proto_goTypes = []any{
 	(*MemoPayload)(nil),          // 0: memos.store.MemoPayload
 	(*MemoPayload_Property)(nil), // 1: memos.store.MemoPayload.Property
 	(*MemoPayload_Location)(nil), // 2: memos.store.MemoPayload.Location
+	(*TagNode)(nil),              // 3: memos.store.TagNode
 }
 var file_store_memo_proto_depIdxs = []int32{
 	1, // 0: memos.store.MemoPayload.property:type_name -> memos.store.MemoPayload.Property
 	2, // 1: memos.store.MemoPayload.location:type_name -> memos.store.MemoPayload.Location
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 2: memos.store.MemoPayload.tags:type_name -> memos.store.TagNode
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_store_memo_proto_init() }
@@ -275,6 +277,7 @@ func file_store_memo_proto_init() {
 	if File_store_memo_proto != nil {
 		return
 	}
+	file_store_tag_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -7,6 +7,7 @@
 package apiv1
 
 import (
+	store "github.com/usememos/memos/proto/gen/store"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -672,7 +673,7 @@ type WorkspaceSetting_MemoRelatedSetting struct {
 	// enable_blur_nsfw_content enables blurring of content marked as not safe for work (NSFW).
 	EnableBlurNsfwContent bool `protobuf:"varint,9,opt,name=enable_blur_nsfw_content,json=enableBlurNsfwContent,proto3" json:"enable_blur_nsfw_content,omitempty"`
 	// nsfw_tags is the list of tags that mark content as NSFW for blurring.
-	NsfwTags      []string `protobuf:"bytes,10,rep,name=nsfw_tags,json=nsfwTags,proto3" json:"nsfw_tags,omitempty"`
+	NsfwTags      []*store.TagNode `protobuf:"bytes,10,rep,name=nsfw_tags,json=nsfwTags,proto3" json:"nsfw_tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -763,7 +764,7 @@ func (x *WorkspaceSetting_MemoRelatedSetting) GetEnableBlurNsfwContent() bool {
 	return false
 }
 
-func (x *WorkspaceSetting_MemoRelatedSetting) GetNsfwTags() []string {
+func (x *WorkspaceSetting_MemoRelatedSetting) GetNsfwTags() []*store.TagNode {
 	if x != nil {
 		return x.NsfwTags
 	}
@@ -937,13 +938,13 @@ var File_api_v1_workspace_service_proto protoreflect.FileDescriptor
 
 const file_api_v1_workspace_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1eapi/v1/workspace_service.proto\x12\fmemos.api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a google/protobuf/field_mask.proto\"y\n" +
+	"\x1eapi/v1/workspace_service.proto\x12\fmemos.api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a google/protobuf/field_mask.proto\x1a\x0fstore/tag.proto\"y\n" +
 	"\x10WorkspaceProfile\x12\x14\n" +
 	"\x05owner\x18\x01 \x01(\tR\x05owner\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12\x12\n" +
 	"\x04mode\x18\x03 \x01(\tR\x04mode\x12!\n" +
 	"\finstance_url\x18\x06 \x01(\tR\vinstanceUrl\"\x1c\n" +
-	"\x1aGetWorkspaceProfileRequest\"\xb8\x11\n" +
+	"\x1aGetWorkspaceProfileRequest\"\xce\x11\n" +
 	"\x10WorkspaceSetting\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tB\x03\xe0A\bR\x04name\x12X\n" +
 	"\x0fgeneral_setting\x18\x02 \x01(\v2-.memos.api.v1.WorkspaceSetting.GeneralSettingH\x00R\x0egeneralSetting\x12X\n" +
@@ -983,7 +984,7 @@ const file_api_v1_workspace_service_proto_rawDesc = "" +
 	"\x18STORAGE_TYPE_UNSPECIFIED\x10\x00\x12\f\n" +
 	"\bDATABASE\x10\x01\x12\t\n" +
 	"\x05LOCAL\x10\x02\x12\x06\n" +
-	"\x02S3\x10\x03\x1a\xd8\x03\n" +
+	"\x02S3\x10\x03\x1a\xee\x03\n" +
 	"\x12MemoRelatedSetting\x12<\n" +
 	"\x1adisallow_public_visibility\x18\x01 \x01(\bR\x18disallowPublicVisibility\x127\n" +
 	"\x18display_with_update_time\x18\x02 \x01(\bR\x15displayWithUpdateTime\x120\n" +
@@ -992,9 +993,9 @@ const file_api_v1_workspace_service_proto_rawDesc = "" +
 	"\x13enable_link_preview\x18\x05 \x01(\bR\x11enableLinkPreview\x12\x1c\n" +
 	"\treactions\x18\a \x03(\tR\treactions\x12<\n" +
 	"\x1adisable_markdown_shortcuts\x18\b \x01(\bR\x18disableMarkdownShortcuts\x127\n" +
-	"\x18enable_blur_nsfw_content\x18\t \x01(\bR\x15enableBlurNsfwContent\x12\x1b\n" +
+	"\x18enable_blur_nsfw_content\x18\t \x01(\bR\x15enableBlurNsfwContent\x121\n" +
 	"\tnsfw_tags\x18\n" +
-	" \x03(\tR\bnsfwTags\"F\n" +
+	" \x03(\v2\x14.memos.store.TagNodeR\bnsfwTags\"F\n" +
 	"\x03Key\x12\x13\n" +
 	"\x0fKEY_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aGENERAL\x10\x01\x12\v\n" +
@@ -1043,6 +1044,7 @@ var file_api_v1_workspace_service_proto_goTypes = []any{
 	(*WorkspaceSetting_GeneralSetting_CustomProfile)(nil), // 10: memos.api.v1.WorkspaceSetting.GeneralSetting.CustomProfile
 	(*WorkspaceSetting_StorageSetting_S3Config)(nil),      // 11: memos.api.v1.WorkspaceSetting.StorageSetting.S3Config
 	(*fieldmaskpb.FieldMask)(nil),                         // 12: google.protobuf.FieldMask
+	(*store.TagNode)(nil),                                 // 13: memos.store.TagNode
 }
 var file_api_v1_workspace_service_proto_depIdxs = []int32{
 	7,  // 0: memos.api.v1.WorkspaceSetting.general_setting:type_name -> memos.api.v1.WorkspaceSetting.GeneralSetting
@@ -1053,17 +1055,18 @@ var file_api_v1_workspace_service_proto_depIdxs = []int32{
 	10, // 5: memos.api.v1.WorkspaceSetting.GeneralSetting.custom_profile:type_name -> memos.api.v1.WorkspaceSetting.GeneralSetting.CustomProfile
 	1,  // 6: memos.api.v1.WorkspaceSetting.StorageSetting.storage_type:type_name -> memos.api.v1.WorkspaceSetting.StorageSetting.StorageType
 	11, // 7: memos.api.v1.WorkspaceSetting.StorageSetting.s3_config:type_name -> memos.api.v1.WorkspaceSetting.StorageSetting.S3Config
-	3,  // 8: memos.api.v1.WorkspaceService.GetWorkspaceProfile:input_type -> memos.api.v1.GetWorkspaceProfileRequest
-	5,  // 9: memos.api.v1.WorkspaceService.GetWorkspaceSetting:input_type -> memos.api.v1.GetWorkspaceSettingRequest
-	6,  // 10: memos.api.v1.WorkspaceService.UpdateWorkspaceSetting:input_type -> memos.api.v1.UpdateWorkspaceSettingRequest
-	2,  // 11: memos.api.v1.WorkspaceService.GetWorkspaceProfile:output_type -> memos.api.v1.WorkspaceProfile
-	4,  // 12: memos.api.v1.WorkspaceService.GetWorkspaceSetting:output_type -> memos.api.v1.WorkspaceSetting
-	4,  // 13: memos.api.v1.WorkspaceService.UpdateWorkspaceSetting:output_type -> memos.api.v1.WorkspaceSetting
-	11, // [11:14] is the sub-list for method output_type
-	8,  // [8:11] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	13, // 8: memos.api.v1.WorkspaceSetting.MemoRelatedSetting.nsfw_tags:type_name -> memos.store.TagNode
+	3,  // 9: memos.api.v1.WorkspaceService.GetWorkspaceProfile:input_type -> memos.api.v1.GetWorkspaceProfileRequest
+	5,  // 10: memos.api.v1.WorkspaceService.GetWorkspaceSetting:input_type -> memos.api.v1.GetWorkspaceSettingRequest
+	6,  // 11: memos.api.v1.WorkspaceService.UpdateWorkspaceSetting:input_type -> memos.api.v1.UpdateWorkspaceSettingRequest
+	2,  // 12: memos.api.v1.WorkspaceService.GetWorkspaceProfile:output_type -> memos.api.v1.WorkspaceProfile
+	4,  // 13: memos.api.v1.WorkspaceService.GetWorkspaceSetting:output_type -> memos.api.v1.WorkspaceSetting
+	4,  // 14: memos.api.v1.WorkspaceService.UpdateWorkspaceSetting:output_type -> memos.api.v1.WorkspaceSetting
+	12, // [12:15] is the sub-list for method output_type
+	9,  // [9:12] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_api_v1_workspace_service_proto_init() }

@@ -70,6 +70,9 @@ func (d *SQLiteDialect) GetJSONArrayLength(path string) string {
 }
 
 func (d *SQLiteDialect) GetJSONContains(path, _ string) string {
+	if path == "$.tags" {
+		return "EXISTS(SELECT 1 FROM JSON_EACH(JSON_EXTRACT(`memo`.`payload`, '$.tags')) WHERE JSON_EXTRACT(value, '$.name') LIKE ?)"
+	}
 	return fmt.Sprintf("%s LIKE ?", d.GetJSONExtract(path))
 }
 
@@ -123,6 +126,9 @@ func (d *MySQLDialect) GetJSONArrayLength(path string) string {
 }
 
 func (d *MySQLDialect) GetJSONContains(path, _ string) string {
+	if path == "$.tags" {
+		return "JSON_SEARCH(JSON_EXTRACT(`memo`.`payload`, '$.tags[*].name'), 'one', ?) IS NOT NULL"
+	}
 	return fmt.Sprintf("JSON_CONTAINS(%s, ?)", d.GetJSONExtract(path))
 }
 
@@ -184,6 +190,9 @@ func (d *PostgreSQLDialect) GetJSONArrayLength(path string) string {
 }
 
 func (d *PostgreSQLDialect) GetJSONContains(path, _ string) string {
+	if path == "$.tags" {
+		return "EXISTS(SELECT 1 FROM jsonb_array_elements(memo.payload->'tags') elem WHERE elem->>'name' = ?)"
+	}
 	jsonPath := strings.Replace(path, "$.tags", "payload->'tags'", 1)
 	return fmt.Sprintf("%s.%s @> jsonb_build_array(?::json)", d.GetTablePrefix(), jsonPath)
 }

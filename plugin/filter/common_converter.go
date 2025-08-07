@@ -240,10 +240,10 @@ func (c *CommonSQLConverter) handleElementInTags(ctx *ConvertContext, elementExp
 		return err
 	}
 
-	// Handle args based on dialect
+	// Handle args based on dialect  
 	if _, ok := c.dialect.(*SQLiteDialect); ok {
-		// SQLite uses LIKE with pattern
-		ctx.Args = append(ctx.Args, fmt.Sprintf(`%%"%s"%%`, element))
+		// SQLite uses LIKE with pattern for TagNode.name (no quotes around the value)
+		ctx.Args = append(ctx.Args, fmt.Sprintf(`%%%s%%`, element))
 	} else {
 		// MySQL and PostgreSQL expect plain values
 		ctx.Args = append(ctx.Args, element)
@@ -259,14 +259,14 @@ func (c *CommonSQLConverter) handleTagInList(ctx *ConvertContext, values []any) 
 
 	for _, v := range values {
 		if _, ok := c.dialect.(*SQLiteDialect); ok {
-			subconditions = append(subconditions, c.dialect.GetJSONLike("$.tags", "pattern"))
-			args = append(args, fmt.Sprintf(`%%"%s"%%`, v))
+			subconditions = append(subconditions, c.dialect.GetJSONContains("$.tags", "element"))
+			args = append(args, fmt.Sprintf(`%%%s%%`, v)) // No quotes around the value for TagNode.name
 		} else {
 			// Replace ? with proper placeholder for each dialect
 			template := c.dialect.GetJSONContains("$.tags", "element")
 			sql := strings.Replace(template, "?", c.dialect.GetParameterPlaceholder(c.paramIndex), 1)
 			subconditions = append(subconditions, sql)
-			args = append(args, fmt.Sprintf(`"%s"`, v))
+			args = append(args, v) // No need to wrap in quotes anymore
 		}
 		c.paramIndex++
 	}

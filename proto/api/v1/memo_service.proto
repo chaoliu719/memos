@@ -12,6 +12,7 @@ import "google/api/resource.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
+import "store/tag.proto";
 
 option go_package = "gen/api/v1";
 
@@ -206,7 +207,7 @@ message Memo {
   Visibility visibility = 9 [(google.api.field_behavior) = REQUIRED];
 
   // Output only. The tags extracted from the content.
-  repeated string tags = 10 [(google.api.field_behavior) = OUTPUT_ONLY];
+  repeated memos.store.TagNode tags = 10 [(google.api.field_behavior) = OUTPUT_ONLY];
 
   // Whether the memo is pinned.
   bool pinned = 11 [(google.api.field_behavior) = OPTIONAL];

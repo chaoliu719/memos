@@ -87,12 +87,12 @@ const MemoDetailSidebar = ({ memo, className, parentPage }: Props) => {
             <div className="w-full flex flex-row justify-start items-center relative flex-wrap gap-x-2 gap-y-1">
               {memo.tags.map((tag) => (
                 <div
-                  key={tag}
+                  key={tag.name}
                   className="shrink-0 w-auto max-w-full text-sm rounded-md leading-6 flex flex-row justify-start items-center select-none hover:opacity-80 text-muted-foreground"
                 >
                   <HashIcon className="group-hover:hidden w-4 h-auto shrink-0 opacity-40" />
                   <div className={cn("inline-flex flex-nowrap ml-0.5 gap-0.5 cursor-pointer max-w-[calc(100%-16px)]")}>
-                    <span className="truncate opacity-80">{tag}</span>
+                    <span className="truncate opacity-80">{tag.name}</span>
                   </div>
                 </div>
               ))}

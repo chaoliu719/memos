@@ -7,6 +7,7 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { FieldMask } from "../../google/protobuf/field_mask";
+import { TagNode } from "../../store/tag";
 
 export const protobufPackage = "memos.api.v1";
 
@@ -230,7 +231,7 @@ export interface WorkspaceSetting_MemoRelatedSetting {
   /** enable_blur_nsfw_content enables blurring of content marked as not safe for work (NSFW). */
   enableBlurNsfwContent: boolean;
   /** nsfw_tags is the list of tags that mark content as NSFW for blurring. */
-  nsfwTags: string[];
+  nsfwTags: TagNode[];
 }
 
 /** Request message for GetWorkspaceSetting method. */
@@ -948,7 +949,7 @@ export const WorkspaceSetting_MemoRelatedSetting: MessageFns<WorkspaceSetting_Me
       writer.uint32(72).bool(message.enableBlurNsfwContent);
     }
     for (const v of message.nsfwTags) {
-      writer.uint32(82).string(v!);
+      TagNode.encode(v!, writer.uint32(82).fork()).join();
     }
     return writer;
   },
@@ -1029,7 +1030,7 @@ export const WorkspaceSetting_MemoRelatedSetting: MessageFns<WorkspaceSetting_Me
             break;
           }
 
-          message.nsfwTags.push(reader.string());
+          message.nsfwTags.push(TagNode.decode(reader, reader.uint32()));
           continue;
         }
       }
@@ -1054,7 +1055,7 @@ export const WorkspaceSetting_MemoRelatedSetting: MessageFns<WorkspaceSetting_Me
     message.reactions = object.reactions?.map((e) => e) || [];
     message.disableMarkdownShortcuts = object.disableMarkdownShortcuts ?? false;
     message.enableBlurNsfwContent = object.enableBlurNsfwContent ?? false;
-    message.nsfwTags = object.nsfwTags?.map((e) => e) || [];
+    message.nsfwTags = object.nsfwTags?.map((e) => TagNode.fromPartial(e)) || [];
     return message;
   },
 };

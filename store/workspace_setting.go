@@ -144,7 +144,9 @@ const DefaultContentLengthLimit = 8 * 1024
 var DefaultReactions = []string{"👍", "👎", "❤️", "🎉", "😄", "😕", "😢", "😡"}
 
 // DefaultNsfwTags is the default tags that mark content as NSFW for blurring.
-var DefaultNsfwTags = []string{"nsfw"}
+var DefaultNsfwTags = []*storepb.TagNode{
+	{Name: "nsfw"},
+}
 
 func (s *Store) GetWorkspaceMemoRelatedSetting(ctx context.Context) (*storepb.WorkspaceMemoRelatedSetting, error) {
 	workspaceSetting, err := s.GetWorkspaceSetting(ctx, &FindWorkspaceSetting{

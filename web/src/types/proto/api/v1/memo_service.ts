@@ -9,6 +9,7 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { Empty } from "../../google/protobuf/empty";
 import { FieldMask } from "../../google/protobuf/field_mask";
 import { Timestamp } from "../../google/protobuf/timestamp";
+import { TagNode } from "../../store/tag";
 import { Attachment } from "./attachment_service";
 import { State, stateFromJSON, stateToNumber } from "./common";
 import { Node } from "./markdown_service";
@@ -115,7 +116,7 @@ export interface Memo {
   /** The visibility of the memo. */
   visibility: Visibility;
   /** Output only. The tags extracted from the content. */
-  tags: string[];
+  tags: TagNode[];
   /** Whether the memo is pinned. */
   pinned: boolean;
   /** Optional. The attachments of the memo. */
@@ -629,7 +630,7 @@ export const Memo: MessageFns<Memo> = {
       writer.uint32(72).int32(visibilityToNumber(message.visibility));
     }
     for (const v of message.tags) {
-      writer.uint32(82).string(v!);
+      TagNode.encode(v!, writer.uint32(82).fork()).join();
     }
     if (message.pinned !== false) {
       writer.uint32(88).bool(message.pinned);
@@ -742,7 +743,7 @@ export const Memo: MessageFns<Memo> = {
             break;
           }
 
-          message.tags.push(reader.string());
+          message.tags.push(TagNode.decode(reader, reader.uint32()));
           continue;
         }
         case 11: {
@@ -832,7 +833,7 @@ export const Memo: MessageFns<Memo> = {
     message.content = object.content ?? "";
     message.nodes = object.nodes?.map((e) => Node.fromPartial(e)) || [];
     message.visibility = object.visibility ?? Visibility.VISIBILITY_UNSPECIFIED;
-    message.tags = object.tags?.map((e) => e) || [];
+    message.tags = object.tags?.map((e) => TagNode.fromPartial(e)) || [];
     message.pinned = object.pinned ?? false;
     message.attachments = object.attachments?.map((e) => Attachment.fromPartial(e)) || [];
     message.relations = object.relations?.map((e) => MemoRelation.fromPartial(e)) || [];

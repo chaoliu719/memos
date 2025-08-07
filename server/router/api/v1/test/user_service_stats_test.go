@@ -33,7 +33,7 @@ func TestGetUserStats_TagCount(t *testing.T) {
 		Content:    "This is a test memo with #test tag",
 		Visibility: store.Public,
 		Payload: &storepb.MemoPayload{
-			Tags: []string{"test"},
+			Tags: []*storepb.TagNode{{Name: "test"}},
 		},
 	})
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestGetUserStats_TagCount(t *testing.T) {
 		Content:    "Another memo with #test tag",
 		Visibility: store.Public,
 		Payload: &storepb.MemoPayload{
-			Tags: []string{"test"},
+			Tags: []*storepb.TagNode{{Name: "test"}},
 		},
 	})
 	require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestGetUserStats_TagCount(t *testing.T) {
 		Content:    "Memo with #unique tag",
 		Visibility: store.Public,
 		Payload: &storepb.MemoPayload{
-			Tags: []string{"unique"},
+			Tags: []*storepb.TagNode{{Name: "unique"}},
 		},
 	})
 	require.NoError(t, err)

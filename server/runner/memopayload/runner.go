@@ -104,7 +104,12 @@ func RebuildMemoPayload(memo *store.Memo) error {
 			property.References = append(property.References, n.ResourceName)
 		}
 	})
-	memo.Payload.Tags = tags
+	// Convert string tags to TagNode
+	tagNodes := make([]*storepb.TagNode, len(tags))
+	for i, tag := range tags {
+		tagNodes[i] = &storepb.TagNode{Name: tag}
+	}
+	memo.Payload.Tags = tagNodes
 	memo.Payload.Property = property
 	return nil
 }
