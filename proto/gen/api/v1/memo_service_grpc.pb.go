@@ -20,22 +20,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MemoService_CreateMemo_FullMethodName          = "/memos.api.v1.MemoService/CreateMemo"
-	MemoService_ListMemos_FullMethodName           = "/memos.api.v1.MemoService/ListMemos"
-	MemoService_GetMemo_FullMethodName             = "/memos.api.v1.MemoService/GetMemo"
-	MemoService_UpdateMemo_FullMethodName          = "/memos.api.v1.MemoService/UpdateMemo"
-	MemoService_DeleteMemo_FullMethodName          = "/memos.api.v1.MemoService/DeleteMemo"
-	MemoService_RenameMemoTag_FullMethodName       = "/memos.api.v1.MemoService/RenameMemoTag"
-	MemoService_DeleteMemoTag_FullMethodName       = "/memos.api.v1.MemoService/DeleteMemoTag"
-	MemoService_SetMemoAttachments_FullMethodName  = "/memos.api.v1.MemoService/SetMemoAttachments"
-	MemoService_ListMemoAttachments_FullMethodName = "/memos.api.v1.MemoService/ListMemoAttachments"
-	MemoService_SetMemoRelations_FullMethodName    = "/memos.api.v1.MemoService/SetMemoRelations"
-	MemoService_ListMemoRelations_FullMethodName   = "/memos.api.v1.MemoService/ListMemoRelations"
-	MemoService_CreateMemoComment_FullMethodName   = "/memos.api.v1.MemoService/CreateMemoComment"
-	MemoService_ListMemoComments_FullMethodName    = "/memos.api.v1.MemoService/ListMemoComments"
-	MemoService_ListMemoReactions_FullMethodName   = "/memos.api.v1.MemoService/ListMemoReactions"
-	MemoService_UpsertMemoReaction_FullMethodName  = "/memos.api.v1.MemoService/UpsertMemoReaction"
-	MemoService_DeleteMemoReaction_FullMethodName  = "/memos.api.v1.MemoService/DeleteMemoReaction"
+	MemoService_CreateMemo_FullMethodName            = "/memos.api.v1.MemoService/CreateMemo"
+	MemoService_ListMemos_FullMethodName             = "/memos.api.v1.MemoService/ListMemos"
+	MemoService_GetMemo_FullMethodName               = "/memos.api.v1.MemoService/GetMemo"
+	MemoService_UpdateMemo_FullMethodName            = "/memos.api.v1.MemoService/UpdateMemo"
+	MemoService_DeleteMemo_FullMethodName            = "/memos.api.v1.MemoService/DeleteMemo"
+	MemoService_RenameMemoTag_FullMethodName         = "/memos.api.v1.MemoService/RenameMemoTag"
+	MemoService_DeleteMemoTag_FullMethodName         = "/memos.api.v1.MemoService/DeleteMemoTag"
+	MemoService_BatchDeleteMemosByTag_FullMethodName = "/memos.api.v1.MemoService/BatchDeleteMemosByTag"
+	MemoService_SetMemoAttachments_FullMethodName    = "/memos.api.v1.MemoService/SetMemoAttachments"
+	MemoService_ListMemoAttachments_FullMethodName   = "/memos.api.v1.MemoService/ListMemoAttachments"
+	MemoService_SetMemoRelations_FullMethodName      = "/memos.api.v1.MemoService/SetMemoRelations"
+	MemoService_ListMemoRelations_FullMethodName     = "/memos.api.v1.MemoService/ListMemoRelations"
+	MemoService_CreateMemoComment_FullMethodName     = "/memos.api.v1.MemoService/CreateMemoComment"
+	MemoService_ListMemoComments_FullMethodName      = "/memos.api.v1.MemoService/ListMemoComments"
+	MemoService_ListMemoReactions_FullMethodName     = "/memos.api.v1.MemoService/ListMemoReactions"
+	MemoService_UpsertMemoReaction_FullMethodName    = "/memos.api.v1.MemoService/UpsertMemoReaction"
+	MemoService_DeleteMemoReaction_FullMethodName    = "/memos.api.v1.MemoService/DeleteMemoReaction"
 )
 
 // MemoServiceClient is the client API for MemoService service.
@@ -52,10 +53,16 @@ type MemoServiceClient interface {
 	UpdateMemo(ctx context.Context, in *UpdateMemoRequest, opts ...grpc.CallOption) (*Memo, error)
 	// DeleteMemo deletes a memo.
 	DeleteMemo(ctx context.Context, in *DeleteMemoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// RenameMemoTag renames a tag for a memo.
+	// RenameMemoTag renames a tag for a single memo.
+	// Note: Global tag operations (parent="memos/-") are no longer supported.
+	// Use TagService.RenameTag for global tag renaming.
 	RenameMemoTag(ctx context.Context, in *RenameMemoTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// DeleteMemoTag deletes a tag for a memo.
+	// DeleteMemoTag deletes a tag for a single memo.
+	// Note: Global tag operations (parent="memos/-") are no longer supported.
+	// Use TagService.DeleteTag to remove tags globally, or BatchDeleteMemosByTag to delete memos.
 	DeleteMemoTag(ctx context.Context, in *DeleteMemoTagRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// BatchDeleteMemosByTag deletes all memos containing a specific tag.
+	BatchDeleteMemosByTag(ctx context.Context, in *BatchDeleteMemosByTagRequest, opts ...grpc.CallOption) (*BatchDeleteMemosByTagResponse, error)
 	// SetMemoAttachments sets attachments for a memo.
 	SetMemoAttachments(ctx context.Context, in *SetMemoAttachmentsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// ListMemoAttachments lists attachments for a memo.
@@ -148,6 +155,16 @@ func (c *memoServiceClient) DeleteMemoTag(ctx context.Context, in *DeleteMemoTag
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, MemoService_DeleteMemoTag_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *memoServiceClient) BatchDeleteMemosByTag(ctx context.Context, in *BatchDeleteMemosByTagRequest, opts ...grpc.CallOption) (*BatchDeleteMemosByTagResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BatchDeleteMemosByTagResponse)
+	err := c.cc.Invoke(ctx, MemoService_BatchDeleteMemosByTag_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -258,10 +275,16 @@ type MemoServiceServer interface {
 	UpdateMemo(context.Context, *UpdateMemoRequest) (*Memo, error)
 	// DeleteMemo deletes a memo.
 	DeleteMemo(context.Context, *DeleteMemoRequest) (*emptypb.Empty, error)
-	// RenameMemoTag renames a tag for a memo.
+	// RenameMemoTag renames a tag for a single memo.
+	// Note: Global tag operations (parent="memos/-") are no longer supported.
+	// Use TagService.RenameTag for global tag renaming.
 	RenameMemoTag(context.Context, *RenameMemoTagRequest) (*emptypb.Empty, error)
-	// DeleteMemoTag deletes a tag for a memo.
+	// DeleteMemoTag deletes a tag for a single memo.
+	// Note: Global tag operations (parent="memos/-") are no longer supported.
+	// Use TagService.DeleteTag to remove tags globally, or BatchDeleteMemosByTag to delete memos.
 	DeleteMemoTag(context.Context, *DeleteMemoTagRequest) (*emptypb.Empty, error)
+	// BatchDeleteMemosByTag deletes all memos containing a specific tag.
+	BatchDeleteMemosByTag(context.Context, *BatchDeleteMemosByTagRequest) (*BatchDeleteMemosByTagResponse, error)
 	// SetMemoAttachments sets attachments for a memo.
 	SetMemoAttachments(context.Context, *SetMemoAttachmentsRequest) (*emptypb.Empty, error)
 	// ListMemoAttachments lists attachments for a memo.
@@ -310,6 +333,9 @@ func (UnimplementedMemoServiceServer) RenameMemoTag(context.Context, *RenameMemo
 }
 func (UnimplementedMemoServiceServer) DeleteMemoTag(context.Context, *DeleteMemoTagRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMemoTag not implemented")
+}
+func (UnimplementedMemoServiceServer) BatchDeleteMemosByTag(context.Context, *BatchDeleteMemosByTagRequest) (*BatchDeleteMemosByTagResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchDeleteMemosByTag not implemented")
 }
 func (UnimplementedMemoServiceServer) SetMemoAttachments(context.Context, *SetMemoAttachmentsRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetMemoAttachments not implemented")
@@ -481,6 +507,24 @@ func _MemoService_DeleteMemoTag_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MemoServiceServer).DeleteMemoTag(ctx, req.(*DeleteMemoTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MemoService_BatchDeleteMemosByTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchDeleteMemosByTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MemoServiceServer).BatchDeleteMemosByTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MemoService_BatchDeleteMemosByTag_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MemoServiceServer).BatchDeleteMemosByTag(ctx, req.(*BatchDeleteMemosByTagRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -681,6 +725,10 @@ var MemoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMemoTag",
 			Handler:    _MemoService_DeleteMemoTag_Handler,
+		},
+		{
+			MethodName: "BatchDeleteMemosByTag",
+			Handler:    _MemoService_BatchDeleteMemosByTag_Handler,
 		},
 		{
 			MethodName: "SetMemoAttachments",

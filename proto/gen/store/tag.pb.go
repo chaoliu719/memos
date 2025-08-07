@@ -23,8 +23,15 @@ const (
 
 type TagNode struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The display name of the tag
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The full hierarchical path (e.g., "/work/project1/backend")
+	// 在树形标签系统中，name 字段自然演变为完整路径，作为标签的唯一标识符
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Path segments for efficient querying (e.g., ["work", "project1", "backend"])
+	PathSegments []string `protobuf:"bytes,2,rep,name=path_segments,json=pathSegments,proto3" json:"path_segments,omitempty"`
+	// All memo IDs that use this tag (populated by TagService at runtime)
+	MemoIds []string `protobuf:"bytes,3,rep,name=memo_ids,json=memoIds,proto3" json:"memo_ids,omitempty"`
+	// Creator for user isolation
+	CreatorId     int32 `protobuf:"varint,4,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -66,13 +73,38 @@ func (x *TagNode) GetName() string {
 	return ""
 }
 
+func (x *TagNode) GetPathSegments() []string {
+	if x != nil {
+		return x.PathSegments
+	}
+	return nil
+}
+
+func (x *TagNode) GetMemoIds() []string {
+	if x != nil {
+		return x.MemoIds
+	}
+	return nil
+}
+
+func (x *TagNode) GetCreatorId() int32 {
+	if x != nil {
+		return x.CreatorId
+	}
+	return 0
+}
+
 var File_store_tag_proto protoreflect.FileDescriptor
 
 const file_store_tag_proto_rawDesc = "" +
 	"\n" +
-	"\x0fstore/tag.proto\x12\vmemos.store\"\x1d\n" +
+	"\x0fstore/tag.proto\x12\vmemos.store\"|\n" +
 	"\aTagNode\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04nameB\x93\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
+	"\rpath_segments\x18\x02 \x03(\tR\fpathSegments\x12\x19\n" +
+	"\bmemo_ids\x18\x03 \x03(\tR\amemoIds\x12\x1d\n" +
+	"\n" +
+	"creator_id\x18\x04 \x01(\x05R\tcreatorIdB\x93\x01\n" +
 	"\x0fcom.memos.storeB\bTagProtoP\x01Z)github.com/usememos/memos/proto/gen/store\xa2\x02\x03MSX\xaa\x02\vMemos.Store\xca\x02\vMemos\\Store\xe2\x02\x17Memos\\Store\\GPBMetadata\xea\x02\fMemos::Storeb\x06proto3"
 
 var (

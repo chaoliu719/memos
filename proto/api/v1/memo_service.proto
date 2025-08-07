@@ -48,7 +48,9 @@ service MemoService {
     option (google.api.http) = {delete: "/api/v1/{name=memos/*}"};
     option (google.api.method_signature) = "name";
   }
-  // RenameMemoTag renames a tag for a memo.
+  // RenameMemoTag renames a tag for a single memo.
+  // Note: Global tag operations (parent="memos/-") are no longer supported.
+  // Use TagService.RenameTag for global tag renaming.
   rpc RenameMemoTag(RenameMemoTagRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       patch: "/api/v1/{parent=memos/*}/tags:rename"
@@ -56,10 +58,19 @@ service MemoService {
     };
     option (google.api.method_signature) = "parent,old_tag,new_tag";
   }
-  // DeleteMemoTag deletes a tag for a memo.
+  // DeleteMemoTag deletes a tag for a single memo.
+  // Note: Global tag operations (parent="memos/-") are no longer supported.
+  // Use TagService.DeleteTag to remove tags globally, or BatchDeleteMemosByTag to delete memos.
   rpc DeleteMemoTag(DeleteMemoTagRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {delete: "/api/v1/{parent=memos/*}/tags/{tag}"};
     option (google.api.method_signature) = "parent,tag";
+  }
+  // BatchDeleteMemosByTag deletes all memos containing a specific tag.
+  rpc BatchDeleteMemosByTag(BatchDeleteMemosByTagRequest) returns (BatchDeleteMemosByTagResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/memos"  // Query parameters: ?tag_path=...&include_children=...&dry_run=...
+    };
+    option (google.api.method_signature) = "tag_path";
   }
   // SetMemoAttachments sets attachments for a memo.
   rpc SetMemoAttachments(SetMemoAttachmentsRequest) returns (google.protobuf.Empty) {
@@ -352,7 +363,7 @@ message DeleteMemoRequest {
 
 message RenameMemoTagRequest {
   // Required. The parent, who owns the tags.
-  // Format: memos/{memo}. Use "memos/-" to rename all tags.
+  // Format: memos/{memo_id} ("memos/-" is no longer supported)
   string parent = 1 [
     (google.api.field_behavior) = REQUIRED,
     (google.api.resource_reference) = {type: "memos.api.v1/Memo"}
@@ -367,7 +378,7 @@ message RenameMemoTagRequest {
 
 message DeleteMemoTagRequest {
   // Required. The parent, who owns the tags.
-  // Format: memos/{memo}. Use "memos/-" to delete all tags.
+  // Format: memos/{memo_id} ("memos/-" is no longer supported)
   string parent = 1 [
     (google.api.field_behavior) = REQUIRED,
     (google.api.resource_reference) = {type: "memos.api.v1/Memo"}
@@ -375,9 +386,6 @@ message DeleteMemoTagRequest {
 
   // Required. The tag name to delete.
   string tag = 2 [(google.api.field_behavior) = REQUIRED];
-
-  // Optional. Whether to delete related memos.
-  bool delete_related_memos = 3 [(google.api.field_behavior) = OPTIONAL];
 }
 
 message SetMemoAttachmentsRequest {
@@ -574,4 +582,23 @@ message DeleteMemoReactionRequest {
     (google.api.field_behavior) = REQUIRED,
     (google.api.resource_reference) = {type: "memos.api.v1/Reaction"}
   ];
+}
+
+message BatchDeleteMemosByTagRequest {
+  // Query parameter: ?tag_path=/work/project1
+  string tag_path = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // Query parameter: ?include_children=true
+  // Server default: true if not specified
+  bool include_children = 2;
+
+  // Query parameter: ?dry_run=true
+  // Server default: false if not specified
+  bool dry_run = 3;
+}
+
+message BatchDeleteMemosByTagResponse {
+  repeated string deleted_memo_ids = 1;
+  int32 deleted_count = 2;
+  repeated string affected_tag_paths = 3;
 }

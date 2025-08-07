@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package memos.api.v1;
+
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "store/tag.proto";
+
+option go_package = "gen/api/v1";
+
+service TagService {
+  // List all tags with optional filtering
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/tags"
+    };
+  }
+
+  // Get specific tag details
+  rpc GetTag(GetTagRequest) returns (GetTagResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/tags/{tag_path=**}"  // ** for path parameters with '/'
+    };
+    option (google.api.method_signature) = "tag_path";
+  }
+
+  // Rename tag globally (supports path moving)
+  rpc RenameTag(RenameTagRequest) returns (RenameTagResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/tags/{old_tag_path=**}:rename"
+      body: "*"
+    };
+    option (google.api.method_signature) = "old_tag_path,new_tag_path";
+  }
+
+  // Delete tag from all content (without deleting memos)
+  rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/tags/{tag_path=**}"
+    };
+    option (google.api.method_signature) = "tag_path";
+  }
+}
+
+message ListTagsRequest {
+  // Query parameter: ?path_prefix=/work
+  string path_prefix = 1;
+
+  // Query parameter: ?include_memo_ids=true
+  // Server default: false if not specified
+  bool include_memo_ids = 2;
+
+  // Query parameter: ?include_hierarchy=true
+  // Server default: true if not specified
+  bool include_hierarchy = 3;
+}
+
+message GetTagRequest {
+  // Path parameter: /api/v1/tags/{tag_path}
+  // URL encoded if contains '/' (e.g., %2Fwork%2Fproject1)
+  string tag_path = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // Query parameter: ?include_memo_ids=true
+  // Server default: true if not specified
+  bool include_memo_ids = 2;
+}
+
+message RenameTagRequest {
+  // Path parameter: /api/v1/tags/{old_tag_path}:rename
+  string old_tag_path = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // Request body field
+  string new_tag_path = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // Request body field - Server default: true if not specified
+  bool move_children = 3;
+}
+
+message DeleteTagRequest {
+  // Path parameter: /api/v1/tags/{tag_path}
+  string tag_path = 1 [(google.api.field_behavior) = REQUIRED];
+
+  enum DeleteStrategy {
+    REMOVE_FROM_CONTENT = 0;  // Remove tag from all memo content
+    DELETE_RELATED_MEMOS = 1; // Delete memos containing this tag
+  }
+
+  // Query parameter: ?strategy=REMOVE_FROM_CONTENT
+  // Server default: REMOVE_FROM_CONTENT if not specified
+  DeleteStrategy strategy = 2;
+}
+
+message TagWithMemos {
+  memos.store.TagNode tag_node = 1;
+
+  // Direct memo count (excluding child tags)
+  int32 direct_memo_count = 2;
+
+  // Total memo count (including child tags)
+  int32 total_memo_count = 3;
+
+  // Child tag paths
+  repeated string child_paths = 4;
+
+  // Parent tag path
+  string parent_path = 5;
+}
+
+message ListTagsResponse {
+  repeated TagWithMemos tags = 1;
+  int32 total_count = 2;
+}
+
+message GetTagResponse {
+  TagWithMemos tag = 1;
+}
+
+message RenameTagResponse {
+  // Affected memo IDs
+  repeated string affected_memo_ids = 1;
+
+  // Old and new tag paths that were changed
+  map<string, string> renamed_paths = 2; // old_path -> new_path
+}
+
+message DeleteTagResponse {
+  // Memo IDs that had this tag removed
+  repeated string affected_memo_ids = 1;
+
+  // Tag paths that were deleted
+  repeated string deleted_tag_paths = 2;
+}

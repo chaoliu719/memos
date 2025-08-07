@@ -727,6 +727,44 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - MemoService
+            description: BatchDeleteMemosByTag deletes all memos containing a specific tag.
+            operationId: MemoService_BatchDeleteMemosByTag
+            parameters:
+                - name: tagPath
+                  in: query
+                  description: 'Query parameter: ?tag_path=/work/project1'
+                  schema:
+                    type: string
+                - name: includeChildren
+                  in: query
+                  description: |-
+                    Query parameter: ?include_children=true
+                     Server default: true if not specified
+                  schema:
+                    type: boolean
+                - name: dryRun
+                  in: query
+                  description: |-
+                    Query parameter: ?dry_run=true
+                     Server default: false if not specified
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchDeleteMemosByTagResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/v1/memos/{memo}:
         get:
             tags:
@@ -1110,7 +1148,10 @@ paths:
         delete:
             tags:
                 - MemoService
-            description: DeleteMemoTag deletes a tag for a memo.
+            description: |-
+                DeleteMemoTag deletes a tag for a single memo.
+                 Note: Global tag operations (parent="memos/-") are no longer supported.
+                 Use TagService.DeleteTag to remove tags globally, or BatchDeleteMemosByTag to delete memos.
             operationId: MemoService_DeleteMemoTag
             parameters:
                 - name: tag
@@ -1131,11 +1172,6 @@ paths:
                   required: true
                   schema:
                     type: string
-                - name: deleteRelatedMemos
-                  in: query
-                  description: Optional. Whether to delete related memos.
-                  schema:
-                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -1150,7 +1186,10 @@ paths:
         patch:
             tags:
                 - MemoService
-            description: RenameMemoTag renames a tag for a memo.
+            description: |-
+                RenameMemoTag renames a tag for a single memo.
+                 Note: Global tag operations (parent="memos/-") are no longer supported.
+                 Use TagService.RenameTag for global tag renaming.
             operationId: MemoService_RenameMemoTag
             parameters:
                 - name: memo
@@ -1192,6 +1231,127 @@ paths:
                 "200":
                     description: OK
                     content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/tags:
+        get:
+            tags:
+                - TagService
+            description: List all tags with optional filtering
+            operationId: TagService_ListTags
+            parameters:
+                - name: pathPrefix
+                  in: query
+                  description: 'Query parameter: ?path_prefix=/work'
+                  schema:
+                    type: string
+                - name: includeMemoIds
+                  in: query
+                  description: |-
+                    Query parameter: ?include_memo_ids=true
+                     Server default: false if not specified
+                  schema:
+                    type: boolean
+                - name: includeHierarchy
+                  in: query
+                  description: |-
+                    Query parameter: ?include_hierarchy=true
+                     Server default: true if not specified
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListTagsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/tags/**:
+        get:
+            tags:
+                - TagService
+            description: Get specific tag details
+            operationId: TagService_GetTag
+            parameters:
+                - name: includeMemoIds
+                  in: query
+                  description: |-
+                    Query parameter: ?include_memo_ids=true
+                     Server default: true if not specified
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetTagResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - TagService
+            description: Delete tag from all content (without deleting memos)
+            operationId: TagService_DeleteTag
+            parameters:
+                - name: strategy
+                  in: query
+                  description: |-
+                    Query parameter: ?strategy=REMOVE_FROM_CONTENT
+                     Server default: REMOVE_FROM_CONTENT if not specified
+                  schema:
+                    enum:
+                        - REMOVE_FROM_CONTENT
+                        - DELETE_RELATED_MEMOS
+                    type: string
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteTagResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/tags/**:rename:
+        patch:
+            tags:
+                - TagService
+            description: Rename tag globally (supports path moving)
+            operationId: TagService_RenameTag
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RenameTagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RenameTagResponse'
                 default:
                     description: Default error response
                     content:
@@ -2324,6 +2484,20 @@ components:
                     type: string
                 isRawText:
                     type: boolean
+        BatchDeleteMemosByTagResponse:
+            type: object
+            properties:
+                deletedMemoIds:
+                    type: array
+                    items:
+                        type: string
+                deletedCount:
+                    type: integer
+                    format: int32
+                affectedTagPaths:
+                    type: array
+                    items:
+                        type: string
         BlockquoteNode:
             type: object
             properties:
@@ -2424,6 +2598,19 @@ components:
                         Last time the session was accessed.
                          Used for sliding expiration calculation (last_accessed_time + 2 weeks).
                     format: date-time
+        DeleteTagResponse:
+            type: object
+            properties:
+                affectedMemoIds:
+                    type: array
+                    items:
+                        type: string
+                    description: Memo IDs that had this tag removed
+                deletedTagPaths:
+                    type: array
+                    items:
+                        type: string
+                    description: Tag paths that were deleted
         EmbeddedContentNode:
             type: object
             properties:
@@ -2474,6 +2661,11 @@ components:
                         Last time the session was accessed.
                          Used for sliding expiration calculation (last_accessed_time + 2 weeks).
                     format: date-time
+        GetTagResponse:
+            type: object
+            properties:
+                tag:
+                    $ref: '#/components/schemas/TagWithMemos'
         GoogleProtobufAny:
             type: object
             properties:
@@ -2798,6 +2990,16 @@ components:
                     items:
                         $ref: '#/components/schemas/Shortcut'
                     description: The list of shortcuts.
+        ListTagsResponse:
+            type: object
+            properties:
+                tags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TagWithMemos'
+                totalCount:
+                    type: integer
+                    format: int32
         ListUserAccessTokensResponse:
             type: object
             properties:
@@ -3250,13 +3452,41 @@ components:
                     type: string
                     description: |-
                         Required. The parent, who owns the tags.
-                         Format: memos/{memo}. Use "memos/-" to rename all tags.
+                         Format: memos/{memo_id} ("memos/-" is no longer supported)
                 oldTag:
                     type: string
                     description: Required. The old tag name to rename.
                 newTag:
                     type: string
                     description: Required. The new tag name.
+        RenameTagRequest:
+            required:
+                - oldTagPath
+                - newTagPath
+            type: object
+            properties:
+                oldTagPath:
+                    type: string
+                    description: 'Path parameter: /api/v1/tags/{old_tag_path}:rename'
+                newTagPath:
+                    type: string
+                    description: Request body field
+                moveChildren:
+                    type: boolean
+                    description: 'Request body field - Server default: true if not specified'
+        RenameTagResponse:
+            type: object
+            properties:
+                affectedMemoIds:
+                    type: array
+                    items:
+                        type: string
+                    description: Affected memo IDs
+                renamedPaths:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: Old and new tag paths that were changed
         RestoreMarkdownNodesRequest:
             required:
                 - nodes
@@ -3418,6 +3648,27 @@ components:
             properties:
                 content:
                     type: string
+        TagWithMemos:
+            type: object
+            properties:
+                tagNode:
+                    $ref: '#/components/schemas/TagNode'
+                directMemoCount:
+                    type: integer
+                    description: Direct memo count (excluding child tags)
+                    format: int32
+                totalMemoCount:
+                    type: integer
+                    description: Total memo count (including child tags)
+                    format: int32
+                childPaths:
+                    type: array
+                    items:
+                        type: string
+                    description: Child tag paths
+                parentPath:
+                    type: string
+                    description: Parent tag path
         TaskListItemNode:
             type: object
             properties:
@@ -3874,5 +4125,6 @@ tags:
     - name: MarkdownService
     - name: MemoService
     - name: ShortcutService
+    - name: TagService
     - name: UserService
     - name: WorkspaceService

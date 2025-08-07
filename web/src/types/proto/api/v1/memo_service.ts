@@ -263,7 +263,7 @@ export interface DeleteMemoRequest {
 export interface RenameMemoTagRequest {
   /**
    * Required. The parent, who owns the tags.
-   * Format: memos/{memo}. Use "memos/-" to rename all tags.
+   * Format: memos/{memo_id} ("memos/-" is no longer supported)
    */
   parent: string;
   /** Required. The old tag name to rename. */
@@ -275,13 +275,11 @@ export interface RenameMemoTagRequest {
 export interface DeleteMemoTagRequest {
   /**
    * Required. The parent, who owns the tags.
-   * Format: memos/{memo}. Use "memos/-" to delete all tags.
+   * Format: memos/{memo_id} ("memos/-" is no longer supported)
    */
   parent: string;
   /** Required. The tag name to delete. */
   tag: string;
-  /** Optional. Whether to delete related memos. */
-  deleteRelatedMemos: boolean;
 }
 
 export interface SetMemoAttachmentsRequest {
@@ -481,6 +479,27 @@ export interface DeleteMemoReactionRequest {
    * Format: reactions/{reaction}
    */
   name: string;
+}
+
+export interface BatchDeleteMemosByTagRequest {
+  /** Query parameter: ?tag_path=/work/project1 */
+  tagPath: string;
+  /**
+   * Query parameter: ?include_children=true
+   * Server default: true if not specified
+   */
+  includeChildren: boolean;
+  /**
+   * Query parameter: ?dry_run=true
+   * Server default: false if not specified
+   */
+  dryRun: boolean;
+}
+
+export interface BatchDeleteMemosByTagResponse {
+  deletedMemoIds: string[];
+  deletedCount: number;
+  affectedTagPaths: string[];
 }
 
 function createBaseReaction(): Reaction {
@@ -1517,7 +1536,7 @@ export const RenameMemoTagRequest: MessageFns<RenameMemoTagRequest> = {
 };
 
 function createBaseDeleteMemoTagRequest(): DeleteMemoTagRequest {
-  return { parent: "", tag: "", deleteRelatedMemos: false };
+  return { parent: "", tag: "" };
 }
 
 export const DeleteMemoTagRequest: MessageFns<DeleteMemoTagRequest> = {
@@ -1527,9 +1546,6 @@ export const DeleteMemoTagRequest: MessageFns<DeleteMemoTagRequest> = {
     }
     if (message.tag !== "") {
       writer.uint32(18).string(message.tag);
-    }
-    if (message.deleteRelatedMemos !== false) {
-      writer.uint32(24).bool(message.deleteRelatedMemos);
     }
     return writer;
   },
@@ -1557,14 +1573,6 @@ export const DeleteMemoTagRequest: MessageFns<DeleteMemoTagRequest> = {
           message.tag = reader.string();
           continue;
         }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.deleteRelatedMemos = reader.bool();
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1581,7 +1589,6 @@ export const DeleteMemoTagRequest: MessageFns<DeleteMemoTagRequest> = {
     const message = createBaseDeleteMemoTagRequest();
     message.parent = object.parent ?? "";
     message.tag = object.tag ?? "";
-    message.deleteRelatedMemos = object.deleteRelatedMemos ?? false;
     return message;
   },
 };
@@ -2584,6 +2591,146 @@ export const DeleteMemoReactionRequest: MessageFns<DeleteMemoReactionRequest> = 
   },
 };
 
+function createBaseBatchDeleteMemosByTagRequest(): BatchDeleteMemosByTagRequest {
+  return { tagPath: "", includeChildren: false, dryRun: false };
+}
+
+export const BatchDeleteMemosByTagRequest: MessageFns<BatchDeleteMemosByTagRequest> = {
+  encode(message: BatchDeleteMemosByTagRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.tagPath !== "") {
+      writer.uint32(10).string(message.tagPath);
+    }
+    if (message.includeChildren !== false) {
+      writer.uint32(16).bool(message.includeChildren);
+    }
+    if (message.dryRun !== false) {
+      writer.uint32(24).bool(message.dryRun);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BatchDeleteMemosByTagRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBatchDeleteMemosByTagRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tagPath = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.includeChildren = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.dryRun = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<BatchDeleteMemosByTagRequest>): BatchDeleteMemosByTagRequest {
+    return BatchDeleteMemosByTagRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BatchDeleteMemosByTagRequest>): BatchDeleteMemosByTagRequest {
+    const message = createBaseBatchDeleteMemosByTagRequest();
+    message.tagPath = object.tagPath ?? "";
+    message.includeChildren = object.includeChildren ?? false;
+    message.dryRun = object.dryRun ?? false;
+    return message;
+  },
+};
+
+function createBaseBatchDeleteMemosByTagResponse(): BatchDeleteMemosByTagResponse {
+  return { deletedMemoIds: [], deletedCount: 0, affectedTagPaths: [] };
+}
+
+export const BatchDeleteMemosByTagResponse: MessageFns<BatchDeleteMemosByTagResponse> = {
+  encode(message: BatchDeleteMemosByTagResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.deletedMemoIds) {
+      writer.uint32(10).string(v!);
+    }
+    if (message.deletedCount !== 0) {
+      writer.uint32(16).int32(message.deletedCount);
+    }
+    for (const v of message.affectedTagPaths) {
+      writer.uint32(26).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BatchDeleteMemosByTagResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBatchDeleteMemosByTagResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.deletedMemoIds.push(reader.string());
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.deletedCount = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.affectedTagPaths.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<BatchDeleteMemosByTagResponse>): BatchDeleteMemosByTagResponse {
+    return BatchDeleteMemosByTagResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BatchDeleteMemosByTagResponse>): BatchDeleteMemosByTagResponse {
+    const message = createBaseBatchDeleteMemosByTagResponse();
+    message.deletedMemoIds = object.deletedMemoIds?.map((e) => e) || [];
+    message.deletedCount = object.deletedCount ?? 0;
+    message.affectedTagPaths = object.affectedTagPaths?.map((e) => e) || [];
+    return message;
+  },
+};
+
 export type MemoServiceDefinition = typeof MemoServiceDefinition;
 export const MemoServiceDefinition = {
   name: "MemoService",
@@ -2779,7 +2926,11 @@ export const MemoServiceDefinition = {
         },
       },
     },
-    /** RenameMemoTag renames a tag for a memo. */
+    /**
+     * RenameMemoTag renames a tag for a single memo.
+     * Note: Global tag operations (parent="memos/-") are no longer supported.
+     * Use TagService.RenameTag for global tag renaming.
+     */
     renameMemoTag: {
       name: "RenameMemoTag",
       requestType: RenameMemoTagRequest,
@@ -2864,7 +3015,11 @@ export const MemoServiceDefinition = {
         },
       },
     },
-    /** DeleteMemoTag deletes a tag for a memo. */
+    /**
+     * DeleteMemoTag deletes a tag for a single memo.
+     * Note: Global tag operations (parent="memos/-") are no longer supported.
+     * Use TagService.DeleteTag to remove tags globally, or BatchDeleteMemosByTag to delete memos.
+     */
     deleteMemoTag: {
       name: "DeleteMemoTag",
       requestType: DeleteMemoTagRequest,
@@ -2916,6 +3071,20 @@ export const MemoServiceDefinition = {
               125,
             ]),
           ],
+        },
+      },
+    },
+    /** BatchDeleteMemosByTag deletes all memos containing a specific tag. */
+    batchDeleteMemosByTag: {
+      name: "BatchDeleteMemosByTag",
+      requestType: BatchDeleteMemosByTagRequest,
+      requestStream: false,
+      responseType: BatchDeleteMemosByTagResponse,
+      responseStream: false,
+      options: {
+        _unknownFields: {
+          8410: [new Uint8Array([8, 116, 97, 103, 95, 112, 97, 116, 104])],
+          578365826: [new Uint8Array([15, 42, 13, 47, 97, 112, 105, 47, 118, 49, 47, 109, 101, 109, 111, 115])],
         },
       },
     },

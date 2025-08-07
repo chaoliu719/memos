@@ -5,6 +5,16 @@ package memos.store;
 option go_package = "gen/store";
 
 message TagNode {
-  // The display name of the tag
+  // The full hierarchical path (e.g., "/work/project1/backend")
+  // 在树形标签系统中，name 字段自然演变为完整路径，作为标签的唯一标识符
   string name = 1;
+
+  // Path segments for efficient querying (e.g., ["work", "project1", "backend"])
+  repeated string path_segments = 2;
+
+  // All memo IDs that use this tag (populated by TagService at runtime)
+  repeated string memo_ids = 3;
+
+  // Creator for user isolation
+  int32 creator_id = 4;
 }
