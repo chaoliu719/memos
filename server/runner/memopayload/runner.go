@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/usememos/gomark/ast"
@@ -104,10 +105,10 @@ func RebuildMemoPayload(memo *store.Memo) error {
 			property.References = append(property.References, n.ResourceName)
 		}
 	})
-	// Convert string tags to TagNode
+	// Convert string tags to TagNode with hierarchical support
 	tagNodes := make([]*storepb.TagNode, len(tags))
 	for i, tag := range tags {
-		tagNodes[i] = &storepb.TagNode{Name: tag}
+		tagNodes[i] = buildTagNode(tag)
 	}
 	memo.Payload.Tags = tagNodes
 	memo.Payload.Property = property
@@ -135,5 +136,34 @@ func TraverseASTNodes(nodes []ast.Node, fn func(ast.Node)) {
 		case *ast.Bold:
 			TraverseASTNodes(n.Children, fn)
 		}
+	}
+}
+
+// buildTagNode creates a TagNode with hierarchical path support
+func buildTagNode(tag string) *storepb.TagNode {
+	// Normalize the tag to start with / for hierarchical tags
+	name := tag
+	if !strings.HasPrefix(name, "/") && strings.Contains(name, "/") {
+		name = "/" + name
+	}
+
+	// Generate path segments for hierarchical queries
+	var pathSegments []string
+	if strings.HasPrefix(name, "/") {
+		// This is a hierarchical tag
+		segments := strings.Split(strings.Trim(name, "/"), "/")
+		if len(segments) > 0 && segments[0] != "" {
+			pathSegments = segments
+		}
+	} else {
+		// This is a simple tag, treat as single segment
+		pathSegments = []string{name}
+	}
+
+	return &storepb.TagNode{
+		Name:         name,
+		PathSegments: pathSegments,
+		// Note: MemoIds and CreatorId are populated at runtime by TagService
+		// They are not stored in the memo payload to avoid data redundancy
 	}
 }

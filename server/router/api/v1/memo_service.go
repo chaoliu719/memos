@@ -550,17 +550,23 @@ func (s *APIV1Service) RenameMemoTag(ctx context.Context, request *v1pb.RenameMe
 		return nil, status.Errorf(codes.Internal, "failed to get current user")
 	}
 
+	// Reject global operations (memos/-) - use TagService.RenameTag instead
+	if request.Parent == "memos/-" {
+		return nil, status.Errorf(codes.InvalidArgument, 
+			"Global tag operations are no longer supported. Use TagService.RenameTag for global tag renaming.")
+	}
+
+	// Extract memo UID from parent
+	memoUID, err := ExtractMemoUIDFromName(request.Parent)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid memo name: %v", err)
+	}
+
 	memoFind := &store.FindMemo{
 		CreatorID:       &user.ID,
+		UID:             &memoUID,
 		Filters:         []string{fmt.Sprintf("tag in [\"%s\"]", request.OldTag)},
 		ExcludeComments: true,
-	}
-	if (request.Parent) != "memos/-" {
-		memoUID, err := ExtractMemoUIDFromName(request.Parent)
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "invalid memo name: %v", err)
-		}
-		memoFind.UID = &memoUID
 	}
 
 	memos, err := s.Store.ListMemos(ctx, memoFind)
@@ -600,18 +606,23 @@ func (s *APIV1Service) DeleteMemoTag(ctx context.Context, request *v1pb.DeleteMe
 		return nil, status.Errorf(codes.Internal, "failed to get current user")
 	}
 
+	// Reject global operations (memos/-) - use TagService.DeleteTag instead
+	if request.Parent == "memos/-" {
+		return nil, status.Errorf(codes.InvalidArgument, 
+			"Global tag operations are no longer supported. Use TagService.DeleteTag to remove tags globally, or MemoService.BatchDeleteMemosByTag to delete memos.")
+	}
+
+	// Extract memo UID from parent
+	memoUID, err := ExtractMemoUIDFromName(request.Parent)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid memo name: %v", err)
+	}
+
 	memoFind := &store.FindMemo{
 		CreatorID:       &user.ID,
+		UID:             &memoUID,
 		Filters:         []string{fmt.Sprintf("tag in [\"%s\"]", request.Tag)},
-		ExcludeContent:  true,
 		ExcludeComments: true,
-	}
-	if request.Parent != "memos/-" {
-		memoUID, err := ExtractMemoUIDFromName(request.Parent)
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "invalid memo name: %v", err)
-		}
-		memoFind.UID = &memoUID
 	}
 
 	memos, err := s.Store.ListMemos(ctx, memoFind)
@@ -619,25 +630,136 @@ func (s *APIV1Service) DeleteMemoTag(ctx context.Context, request *v1pb.DeleteMe
 		return nil, status.Errorf(codes.Internal, "failed to list memos")
 	}
 
+	// Remove the tag from the specific memo's content
 	for _, memo := range memos {
-		if request.DeleteRelatedMemos {
-			err := s.Store.DeleteMemo(ctx, &store.DeleteMemo{ID: memo.ID})
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to delete memo")
-			}
-		} else {
-			archived := store.Archived
-			err := s.Store.UpdateMemo(ctx, &store.UpdateMemo{
-				ID:        memo.ID,
-				RowStatus: &archived,
-			})
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to update memo")
-			}
+		// Parse memo content and remove the specified tag
+		nodes, err := parser.Parse(tokenizer.Tokenize(memo.Content))
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to parse memo: %v", err)
+		}
+		
+		// Remove the tag from AST using recursive traversal
+		nodes = removeTagFromNodes(nodes, request.Tag)
+		
+		// Reconstruct content and update memo
+		memo.Content = restore.Restore(nodes)
+		if err := memopayload.RebuildMemoPayload(memo); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to rebuild memo payload: %v", err)
+		}
+		if err := s.Store.UpdateMemo(ctx, &store.UpdateMemo{
+			ID:      memo.ID,
+			Content: &memo.Content,
+			Payload: memo.Payload,
+		}); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to update memo: %v", err)
 		}
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+// BatchDeleteMemosByTag deletes all memos containing a specific tag
+func (s *APIV1Service) BatchDeleteMemosByTag(ctx context.Context, request *v1pb.BatchDeleteMemosByTagRequest) (*v1pb.BatchDeleteMemosByTagResponse, error) {
+	user, err := s.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get current user")
+	}
+
+	if request.TagPath == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "tag_path is required")
+	}
+
+	// Build tag filter for query
+	var tagFilters []string
+	if request.IncludeChildren {
+		// Include all tags that start with the specified path
+		tagFilters = append(tagFilters, fmt.Sprintf("tag starts_with [\"%s\"]", request.TagPath))
+	} else {
+		// Only exact match
+		tagFilters = append(tagFilters, fmt.Sprintf("tag in [\"%s\"]", request.TagPath))
+	}
+
+	// Find all memos with the specified tag(s)
+	memos, err := s.Store.ListMemos(ctx, &store.FindMemo{
+		CreatorID:       &user.ID,
+		Filters:         tagFilters,
+		ExcludeComments: true,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list memos: %v", err)
+	}
+
+	// If dry_run is true, just return what would be deleted
+	if request.DryRun {
+		deletedMemoIDs := make([]string, len(memos))
+		affectedTagPaths := []string{request.TagPath}
+		
+		for i, memo := range memos {
+			deletedMemoIDs[i] = memo.UID
+		}
+		
+		// If including children, add all child tag paths found
+		if request.IncludeChildren {
+			tagMap := make(map[string]bool)
+			for _, memo := range memos {
+				if memo.Payload != nil {
+					for _, tag := range memo.Payload.Tags {
+						if strings.HasPrefix(tag.Name, request.TagPath) {
+							tagMap[tag.Name] = true
+						}
+					}
+				}
+			}
+			for tagPath := range tagMap {
+				if tagPath != request.TagPath {
+					affectedTagPaths = append(affectedTagPaths, tagPath)
+				}
+			}
+		}
+
+		return &v1pb.BatchDeleteMemosByTagResponse{
+			DeletedMemoIds:     deletedMemoIDs,
+			DeletedCount:       int32(len(deletedMemoIDs)),
+			AffectedTagPaths:   affectedTagPaths,
+		}, nil
+	}
+
+	// Actually delete the memos
+	deletedMemoIDs := make([]string, 0, len(memos))
+	affectedTagPaths := make(map[string]bool)
+	affectedTagPaths[request.TagPath] = true
+
+	for _, memo := range memos {
+		// Collect affected tag paths before deletion
+		if memo.Payload != nil {
+			for _, tag := range memo.Payload.Tags {
+				if request.IncludeChildren && strings.HasPrefix(tag.Name, request.TagPath) {
+					affectedTagPaths[tag.Name] = true
+				} else if tag.Name == request.TagPath {
+					affectedTagPaths[tag.Name] = true
+				}
+			}
+		}
+
+		// Delete the memo
+		err := s.Store.DeleteMemo(ctx, &store.DeleteMemo{ID: memo.ID})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to delete memo %s: %v", memo.UID, err)
+		}
+		deletedMemoIDs = append(deletedMemoIDs, memo.UID)
+	}
+
+	// Convert map to slice
+	affectedTagPathsSlice := make([]string, 0, len(affectedTagPaths))
+	for tagPath := range affectedTagPaths {
+		affectedTagPathsSlice = append(affectedTagPathsSlice, tagPath)
+	}
+
+	return &v1pb.BatchDeleteMemosByTagResponse{
+		DeletedMemoIds:   deletedMemoIDs,
+		DeletedCount:     int32(len(deletedMemoIDs)),
+		AffectedTagPaths: affectedTagPathsSlice,
+	}, nil
 }
 
 func (s *APIV1Service) getContentLengthLimit(ctx context.Context) (int, error) {
@@ -762,4 +884,60 @@ func (*APIV1Service) parseMemoOrderBy(orderBy string, memoFind *store.FindMemo) 
 	}
 
 	return nil
+}
+
+// removeTagFromNodes recursively traverses AST nodes and removes the specified tag
+func removeTagFromNodes(nodes []ast.Node, tagToRemove string) []ast.Node {
+	result := make([]ast.Node, 0, len(nodes))
+	
+	for _, node := range nodes {
+		switch n := node.(type) {
+		case *ast.Tag:
+			// If this tag matches the one we want to remove, skip it
+			if n.Content != tagToRemove {
+				result = append(result, node)
+			}
+		case *ast.Paragraph:
+			// Tags are often within paragraphs, recurse into children
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.Heading:
+			// Tags can also be in headings
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.Blockquote:
+			// Tags can be in blockquotes
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.List:
+			// Tags can be in lists
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.OrderedListItem:
+			// Tags can be in ordered list items
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.UnorderedListItem:
+			// Tags can be in unordered list items
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.TaskListItem:
+			// Tags can be in task list items
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.Bold:
+			// Tags can be in bold text
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		case *ast.Italic:
+			// Tags can be in italic text
+			n.Children = removeTagFromNodes(n.Children, tagToRemove)
+			result = append(result, node)
+		default:
+			// For all other node types, just include them
+			result = append(result, node)
+		}
+	}
+	
+	return result
 }
