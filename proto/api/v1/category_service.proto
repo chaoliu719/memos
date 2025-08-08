@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package memos.api.v1;
+
+import "api/v1/common.proto";
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gen/api/v1";
+
+service CategoryService {
+  // CreateCategory creates a category.
+  rpc CreateCategory(CreateCategoryRequest) returns (Category) {
+    option (google.api.http) = {
+      post: "/api/v1/categories"
+      body: "category"
+    };
+    option (google.api.method_signature) = "category";
+  }
+  // ListCategories lists categories with optional filtering.
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse) {
+    option (google.api.http) = {get: "/api/v1/categories"};
+    option (google.api.method_signature) = "";
+  }
+  // GetCategory gets a category.
+  rpc GetCategory(GetCategoryRequest) returns (Category) {
+    option (google.api.http) = {get: "/api/v1/{name=categories/*}"};
+    option (google.api.method_signature) = "name";
+  }
+  // UpdateCategory updates a category.
+  rpc UpdateCategory(UpdateCategoryRequest) returns (Category) {
+    option (google.api.http) = {
+      patch: "/api/v1/{category.name=categories/*}"
+      body: "category"
+    };
+    option (google.api.method_signature) = "category,update_mask";
+  }
+  // DeleteCategory deletes a category.
+  rpc DeleteCategory(DeleteCategoryRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/api/v1/{name=categories/*}"};
+    option (google.api.method_signature) = "name";
+  }
+  // GetCategoryHierarchy gets the full category hierarchy for the authenticated user.
+  rpc GetCategoryHierarchy(GetCategoryHierarchyRequest) returns (GetCategoryHierarchyResponse) {
+    option (google.api.http) = {get: "/api/v1/categories:hierarchy"};
+    option (google.api.method_signature) = "";
+  }
+}
+
+message Category {
+  option (google.api.resource) = {
+    type: "memos.api/Category"
+    pattern: "categories/{id}"
+    singular: "category"
+    plural: "categories"
+  };
+
+  // The name of the category.
+  // Format: categories/{id}
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  
+  // The system-generated unique ID for the category.
+  int32 id = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+  
+  // The display name of the category.
+  string display_name = 3;
+  
+  // The hierarchical path of the category.
+  string path = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
+  
+  // The parent category name. Empty for root categories.
+  // Format: categories/{id}
+  string parent = 5;
+  
+  // The color of the category in hex format (e.g., #6366f1).
+  string color = 6;
+  
+  // The icon emoji of the category.
+  string icon = 7;
+  
+  // The timestamp when the category was created.
+  google.protobuf.Timestamp create_time = 8 [(google.api.field_behavior) = OUTPUT_ONLY];
+  
+  // The timestamp when the category was last updated.
+  google.protobuf.Timestamp update_time = 9 [(google.api.field_behavior) = OUTPUT_ONLY];
+  
+  // The state of the category.
+  State state = 10;
+}
+
+message CreateCategoryRequest {
+  // The category to create.
+  Category category = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ListCategoriesRequest {
+  // The maximum number of categories to return. The service may return fewer than
+  // this value. If unspecified, at most 50 categories will be returned. The
+  // maximum value is 1000; values above 1000 will be coerced to 1000.
+  int32 page_size = 1;
+  
+  // A page token, received from a previous `ListCategories` call. Provide this to
+  // retrieve the subsequent page.
+  string page_token = 2;
+  
+  // Optional filter expression to filter categories.
+  string filter = 3;
+}
+
+message ListCategoriesResponse {
+  // The list of categories.
+  repeated Category categories = 1;
+  
+  // A token, which can be sent as `page_token` to retrieve the next page. If
+  // this field is omitted, there are no subsequent pages.
+  string next_page_token = 2;
+}
+
+message GetCategoryRequest {
+  // The name of the category to get.
+  // Format: categories/{id}
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "memos.api/Category"}
+  ];
+}
+
+message UpdateCategoryRequest {
+  // The category to update. The category's `name` field is used to identify the
+  // category to update.
+  Category category = 1 [(google.api.field_behavior) = REQUIRED];
+  
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteCategoryRequest {
+  // The name of the category to delete.
+  // Format: categories/{id}
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "memos.api/Category"}
+  ];
+}
+
+message GetCategoryHierarchyRequest {
+  // Optional filter expression to filter the hierarchy.
+  string filter = 1;
+}
+
+message GetCategoryHierarchyResponse {
+  // The hierarchical list of categories, ordered by path.
+  repeated Category categories = 1;
+}

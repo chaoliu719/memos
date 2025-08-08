@@ -138,7 +138,14 @@ export interface Memo {
   /** Output only. The snippet of the memo content. Plain text only. */
   snippet: string;
   /** Optional. The location of the memo. */
-  location?: Location | undefined;
+  location?:
+    | Location
+    | undefined;
+  /**
+   * Optional. The category of the memo.
+   * Format: categories/{id}
+   */
+  category?: string | undefined;
 }
 
 /** Computed properties of a memo. */
@@ -596,6 +603,7 @@ function createBaseMemo(): Memo {
     parent: undefined,
     snippet: "",
     location: undefined,
+    category: undefined,
   };
 }
 
@@ -654,6 +662,9 @@ export const Memo: MessageFns<Memo> = {
     }
     if (message.location !== undefined) {
       Location.encode(message.location, writer.uint32(146).fork()).join();
+    }
+    if (message.category !== undefined) {
+      writer.uint32(154).string(message.category);
     }
     return writer;
   },
@@ -809,6 +820,14 @@ export const Memo: MessageFns<Memo> = {
           message.location = Location.decode(reader, reader.uint32());
           continue;
         }
+        case 19: {
+          if (tag !== 154) {
+            break;
+          }
+
+          message.category = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -845,6 +864,7 @@ export const Memo: MessageFns<Memo> = {
     message.location = (object.location !== undefined && object.location !== null)
       ? Location.fromPartial(object.location)
       : undefined;
+    message.category = object.category ?? undefined;
     return message;
   },
 };

@@ -49,6 +49,11 @@ func (s *APIV1Service) convertMemoFromStore(ctx context.Context, memo *store.Mem
 		memoMessage.Parent = &parentName
 	}
 
+	if memo.CategoryID != nil {
+		categoryName := fmt.Sprintf("%s%d", CategoryNamePrefix, *memo.CategoryID)
+		memoMessage.Category = &categoryName
+	}
+
 	listMemoRelationsResponse, err := s.ListMemoRelations(ctx, &v1pb.ListMemoRelationsRequest{Name: name})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list memo relations")

@@ -236,6 +236,13 @@ message Memo {
   // Optional. The location of the memo.
   optional Location location = 18 [(google.api.field_behavior) = OPTIONAL];
 
+  // Optional. The category of the memo.
+  // Format: categories/{id}
+  optional string category = 19 [
+    (google.api.field_behavior) = OPTIONAL,
+    (google.api.resource_reference) = {type: "memos.api/Category"}
+  ];
+
   // Computed properties of a memo.
   message Property {
     bool has_link = 1;

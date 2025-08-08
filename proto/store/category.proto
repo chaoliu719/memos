@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package memos.store;
+
+option go_package = "gen/store";
+
+message Category {
+  int32 id = 1;
+  string name = 2;
+  string path = 3;
+  optional int32 parent_id = 4;
+  int32 creator_id = 5;
+  string color = 6;
+  string icon = 7;
+  int64 created_ts = 8;
+  int64 updated_ts = 9;
+  
+  enum RowStatus {
+    ROW_STATUS_UNSPECIFIED = 0;
+    NORMAL = 1;
+    ARCHIVED = 2;
+  }
+  RowStatus row_status = 10;
+}

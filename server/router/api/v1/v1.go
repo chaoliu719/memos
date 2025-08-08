@@ -32,6 +32,7 @@ type APIV1Service struct {
 	v1pb.UnimplementedActivityServiceServer
 	v1pb.UnimplementedMarkdownServiceServer
 	v1pb.UnimplementedIdentityProviderServiceServer
+	v1pb.UnimplementedCategoryServiceServer
 
 	Secret  string
 	Profile *profile.Profile
@@ -59,6 +60,7 @@ func NewAPIV1Service(secret string, profile *profile.Profile, store *store.Store
 	v1pb.RegisterActivityServiceServer(grpcServer, apiv1Service)
 	v1pb.RegisterMarkdownServiceServer(grpcServer, apiv1Service)
 	v1pb.RegisterIdentityProviderServiceServer(grpcServer, apiv1Service)
+	v1pb.RegisterCategoryServiceServer(grpcServer, apiv1Service)
 	reflection.Register(grpcServer)
 	return apiv1Service
 }
@@ -113,6 +115,9 @@ func (s *APIV1Service) RegisterGateway(ctx context.Context, echoServer *echo.Ech
 		return err
 	}
 	if err := v1pb.RegisterIdentityProviderServiceHandler(ctx, gwMux, conn); err != nil {
+		return err
+	}
+	if err := v1pb.RegisterCategoryServiceHandler(ctx, gwMux, conn); err != nil {
 		return err
 	}
 	gwGroup := echoServer.Group("")

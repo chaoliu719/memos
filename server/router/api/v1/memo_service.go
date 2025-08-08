@@ -38,6 +38,30 @@ func (s *APIV1Service) CreateMemo(ctx context.Context, request *v1pb.CreateMemoR
 		Content:    request.Memo.Content,
 		Visibility: convertVisibilityToStore(request.Memo.Visibility),
 	}
+
+	// Handle category if specified
+	if request.Memo.Category != nil && *request.Memo.Category != "" {
+		categoryID, err := extractCategoryID(*request.Memo.Category)
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid category name: %v", err)
+		}
+
+		// Verify category exists and belongs to the user
+		normalStatus := store.Normal
+		category, err := s.Store.GetCategory(ctx, &store.FindCategory{
+			ID:        &categoryID,
+			CreatorID: &user.ID,
+			RowStatus: &normalStatus,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get category: %v", err)
+		}
+		if category == nil {
+			return nil, status.Errorf(codes.NotFound, "category not found")
+		}
+
+		create.CategoryID = &categoryID
+	}
 	workspaceMemoRelatedSetting, err := s.Store.GetWorkspaceMemoRelatedSetting(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get workspace memo related setting")
@@ -310,6 +334,32 @@ func (s *APIV1Service) UpdateMemo(ctx context.Context, request *v1pb.UpdateMemoR
 			payload := memo.Payload
 			payload.Location = convertLocationToStore(request.Memo.Location)
 			update.Payload = payload
+		} else if path == "category" {
+			if request.Memo.Category != nil && *request.Memo.Category != "" {
+				categoryID, err := extractCategoryID(*request.Memo.Category)
+				if err != nil {
+					return nil, status.Errorf(codes.InvalidArgument, "invalid category name: %v", err)
+				}
+
+				// Verify category exists and belongs to the user
+				normalStatus := store.Normal
+				category, err := s.Store.GetCategory(ctx, &store.FindCategory{
+					ID:        &categoryID,
+					CreatorID: &user.ID,
+					RowStatus: &normalStatus,
+				})
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "failed to get category: %v", err)
+				}
+				if category == nil {
+					return nil, status.Errorf(codes.NotFound, "category not found")
+				}
+
+				update.CategoryID = &categoryID
+			} else {
+				// Clear category
+				update.CategoryID = nil
+			}
 		} else if path == "attachments" {
 			_, err := s.SetMemoAttachments(ctx, &v1pb.SetMemoAttachmentsRequest{
 				Name:        request.Memo.Name,

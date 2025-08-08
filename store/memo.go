@@ -52,7 +52,8 @@ type Memo struct {
 	Payload    *storepb.MemoPayload
 
 	// Composed fields
-	ParentUID *string
+	ParentUID  *string
+	CategoryID *int32
 }
 
 type FindMemo struct {
@@ -68,6 +69,7 @@ type FindMemo struct {
 	ExcludeContent  bool
 	ExcludeComments bool
 	Filters         []string
+	CategoryID      *int32
 
 	// Pagination
 	Limit  *int
@@ -97,6 +99,7 @@ type UpdateMemo struct {
 	Visibility *Visibility
 	Pinned     *bool
 	Payload    *storepb.MemoPayload
+	CategoryID *int32
 }
 
 type DeleteMemo struct {

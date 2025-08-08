@@ -65,6 +65,12 @@ type Driver interface {
 	UpdateInbox(ctx context.Context, update *UpdateInbox) (*Inbox, error)
 	DeleteInbox(ctx context.Context, delete *DeleteInbox) error
 
+	// Category model related methods.
+	CreateCategory(ctx context.Context, create *Category) (*Category, error)
+	ListCategories(ctx context.Context, find *FindCategory) ([]*Category, error)
+	UpdateCategory(ctx context.Context, update *UpdateCategory) error
+	DeleteCategory(ctx context.Context, delete *DeleteCategory) error
+
 	// Reaction model related methods.
 	UpsertReaction(ctx context.Context, create *Reaction) (*Reaction, error)
 	ListReactions(ctx context.Context, find *FindReaction) ([]*Reaction, error)

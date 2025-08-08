@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -14,8 +15,8 @@ import (
 )
 
 func (d *DB) CreateMemo(ctx context.Context, create *store.Memo) (*store.Memo, error) {
-	fields := []string{"`uid`", "`creator_id`", "`content`", "`visibility`", "`payload`"}
-	placeholder := []string{"?", "?", "?", "?", "?"}
+	fields := []string{"`uid`", "`creator_id`", "`content`", "`visibility`", "`payload`", "`category_id`"}
+	placeholder := []string{"?", "?", "?", "?", "?", "?"}
 	payload := "{}"
 	if create.Payload != nil {
 		payloadBytes, err := protojson.Marshal(create.Payload)
@@ -24,7 +25,7 @@ func (d *DB) CreateMemo(ctx context.Context, create *store.Memo) (*store.Memo, e
 		}
 		payload = string(payloadBytes)
 	}
-	args := []any{create.UID, create.CreatorID, create.Content, create.Visibility, payload}
+	args := []any{create.UID, create.CreatorID, create.Content, create.Visibility, payload, create.CategoryID}
 
 	stmt := "INSERT INTO `memo` (" + strings.Join(fields, ", ") + ") VALUES (" + strings.Join(placeholder, ", ") + ") RETURNING `id`, `created_ts`, `updated_ts`, `row_status`"
 	if err := d.db.QueryRowContext(ctx, stmt, args...).Scan(
@@ -84,6 +85,9 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 	if find.ExcludeComments {
 		where = append(where, "`parent_uid` IS NULL")
 	}
+	if v := find.CategoryID; v != nil {
+		where, args = append(where, "`memo`.`category_id` = ?"), append(args, *v)
+	}
 
 	order := "DESC"
 	if find.OrderByTimeAsc {
@@ -105,6 +109,7 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 		"`memo`.`visibility` AS `visibility`",
 		"`memo`.`pinned` AS `pinned`",
 		"`memo`.`payload` AS `payload`",
+		"`memo`.`category_id` AS `category_id`",
 		"CASE WHEN `parent_memo`.`uid` IS NOT NULL THEN `parent_memo`.`uid` ELSE NULL END AS `parent_uid`",
 	}
 	if !find.ExcludeContent {
@@ -133,6 +138,7 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 	for rows.Next() {
 		var memo store.Memo
 		var payloadBytes []byte
+		var categoryID sql.NullInt32
 		dests := []any{
 			&memo.ID,
 			&memo.UID,
@@ -143,6 +149,7 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 			&memo.Visibility,
 			&memo.Pinned,
 			&payloadBytes,
+			&categoryID,
 			&memo.ParentUID,
 		}
 		if !find.ExcludeContent {
@@ -151,6 +158,11 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 		if err := rows.Scan(dests...); err != nil {
 			return nil, err
 		}
+		
+		if categoryID.Valid {
+			memo.CategoryID = &categoryID.Int32
+		}
+		
 		payload := &storepb.MemoPayload{}
 		if err := protojsonUnmarshaler.Unmarshal(payloadBytes, payload); err != nil {
 			return nil, errors.Wrap(err, "failed to unmarshal payload")
@@ -195,6 +207,9 @@ func (d *DB) UpdateMemo(ctx context.Context, update *store.UpdateMemo) error {
 			return err
 		}
 		set, args = append(set, "`payload` = ?"), append(args, string(payloadBytes))
+	}
+	if v := update.CategoryID; v != nil {
+		set, args = append(set, "`category_id` = ?"), append(args, *v)
 	}
 	if len(set) == 0 {
 		return nil
