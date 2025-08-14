@@ -114,7 +114,17 @@
     "add-your-comment-here": "Voeg hier je opmerking toe…",
     "any-thoughts": "Enkele gedachten…",
     "save": "Opslaan",
-    "no-changes-detected": "Geen wijzigingen gedetecteerd"
+    "no-changes-detected": "Geen wijzigingen gedetecteerd",
+    "tag-recommend": {
+      "tooltip": "Tags aanbevelen",
+      "too-short": "Inhoud te kort (minimaal 15 tekens)",
+      "loading": "Aanbevelingen laden...",
+      "suggested-tags": "Voorgestelde tags",
+      "add-all": "Alles toevoegen",
+      "no-suggestions": "Geen tagsuggesties gevonden",
+      "timeout": "Tag-aanbeveling is verlopen. Probeer het opnieuw.",
+      "error": "Kan tag-aanbevelingen niet ophalen"
+    }
   },
   "filters": {
     "has-code": "heeftCode",

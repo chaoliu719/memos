@@ -112,7 +112,17 @@
     "any-thoughts": "Alguna idea...",
     "save": "Guardar",
     "add-your-comment-here": "Agrega tu comentario aquí...",
-    "no-changes-detected": "No se detectaron cambios"
+    "no-changes-detected": "No se detectaron cambios",
+    "tag-recommend": {
+      "tooltip": "Recomendar etiquetas",
+      "too-short": "Contenido demasiado corto (mínimo 15 caracteres)",
+      "loading": "Cargando recomendaciones...",
+      "suggested-tags": "Etiquetas sugeridas",
+      "add-all": "Agregar todo",
+      "no-suggestions": "No se encontraron sugerencias de etiquetas",
+      "timeout": "La recomendación de etiquetas ha caducado. Por favor, inténtelo de nuevo.",
+      "error": "Error al obtener recomendaciones de etiquetas"
+    }
   },
   "filters": {
     "has-code": "tieneCódigo",

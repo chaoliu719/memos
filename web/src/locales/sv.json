@@ -114,7 +114,17 @@
     "add-your-comment-here": "Lägg till din kommentar här...",
     "any-thoughts": "Några tankar...",
     "save": "Spara",
-    "no-changes-detected": "Inga ändringar upptäckta"
+    "no-changes-detected": "Inga ändringar upptäckta",
+    "tag-recommend": {
+      "tooltip": "Rekommendera taggar",
+      "too-short": "Innehållet för kort (minst 15 tecken)",
+      "loading": "Laddar rekommendationer...",
+      "suggested-tags": "Föreslagna taggar",
+      "add-all": "Lägg till alla",
+      "no-suggestions": "Inga taggförslag hittades",
+      "timeout": "Tagg-rekommendation har gått ut. Försök igen.",
+      "error": "Kunde inte hämta tagg-rekommendationer"
+    }
   },
   "filters": {
     "has-code": "harKod",

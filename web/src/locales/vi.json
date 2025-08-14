@@ -90,7 +90,17 @@
   "editor": {
     "add-your-comment-here": "Thêm bình luận của bạn tại đây...",
     "any-thoughts": "Có suy nghĩ gì...",
-    "save": "Lưu"
+    "save": "Lưu",
+    "tag-recommend": {
+      "tooltip": "Đề xuất thẻ",
+      "too-short": "Nội dung quá ngắn (tối thiểu 15 ký tự)",
+      "loading": "Đang tải đề xuất...",
+      "suggested-tags": "Thẻ được đề xuất",
+      "add-all": "Thêm tất cả",
+      "no-suggestions": "Không tìm thấy đề xuất thẻ",
+      "timeout": "Đề xuất thẻ đã hết thời gian. Vui lòng thử lại.",
+      "error": "Không thể lấy đề xuất thẻ"
+    }
   },
   "inbox": {
     "memo-comment": "{{user}} đã bình luận về {{memo}} của bạn.",

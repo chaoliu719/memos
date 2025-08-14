@@ -114,7 +114,17 @@
     "add-your-comment-here": "Afegeix el teu comentari aquí...",
     "any-thoughts": "Alguna idea...",
     "save": "Guarda",
-    "no-changes-detected": "No s'han detectat canvis"
+    "no-changes-detected": "No s'han detectat canvis",
+    "tag-recommend": {
+      "tooltip": "Recomanar etiquetes",
+      "too-short": "Contingut massa curt (mínim 15 caràcters)",
+      "loading": "Carregant recomanacions...",
+      "suggested-tags": "Etiquetes suggerides",
+      "add-all": "Afegir-ho tot",
+      "no-suggestions": "No s'han trobat suggeriments d'etiquetes",
+      "timeout": "La recomanació d'etiquetes ha esgotat el temps. Torneu-ho a provar.",
+      "error": "No s'han pogut obtenir recomanacions d'etiquetes"
+    }
   },
   "filters": {
     "has-code": "téCodi",

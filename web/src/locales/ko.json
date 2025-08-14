@@ -114,7 +114,17 @@
     "add-your-comment-here": "여기에 댓글을 추가하세요...",
     "any-thoughts": "떠오르는 게 있나요...",
     "save": "저장",
-    "no-changes-detected": "변경사항이 없습니다"
+    "no-changes-detected": "변경사항이 없습니다",
+    "tag-recommend": {
+      "tooltip": "태그 추천",
+      "too-short": "내용이 너무 짧습니다 (최소 15자)",
+      "loading": "추천 로딩 중...",
+      "suggested-tags": "추천 태그",
+      "add-all": "모두 추가",
+      "no-suggestions": "태그 추천을 찾을 수 없습니다",
+      "timeout": "태그 추천이 시간 초과되었습니다. 다시 시도해주세요.",
+      "error": "태그 추천 가져오기에 실패했습니다"
+    }
   },
   "filters": {
     "has-code": "코드있음",

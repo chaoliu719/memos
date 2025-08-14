@@ -114,7 +114,17 @@
     "add-your-comment-here": "Yorumunuzu buraya ekleyin...",
     "any-thoughts": "Düşünceleriniz...",
     "save": "Kaydet",
-    "no-changes-detected": "Değişiklik yok"
+    "no-changes-detected": "Değişiklik yok",
+    "tag-recommend": {
+      "tooltip": "Etiket öner",
+      "too-short": "İçerik çok kısa (en az 15 karakter)",
+      "loading": "Öneriler yükleniyor...",
+      "suggested-tags": "Önerilen etiketler",
+      "add-all": "Tümünü ekle",
+      "no-suggestions": "Etiket önerisi bulunamadı",
+      "timeout": "Etiket önerisi zaman aşımına uğradı. Lütfen tekrar deneyin.",
+      "error": "Etiket önerileri alınamadı"
+    }
   },
   "filters": {
     "has-code": "kodVar",

@@ -114,7 +114,17 @@
     "add-your-comment-here": "Legg til din kommentar her...",
     "any-thoughts": "Noen tanker...",
     "save": "Lagre",
-    "no-changes-detected": "Ingen endringer oppdaget"
+    "no-changes-detected": "Ingen endringer oppdaget",
+    "tag-recommend": {
+      "tooltip": "Anbefal tagger",
+      "too-short": "Innholdet for kort (minimum 15 tegn)",
+      "loading": "Laster anbefalinger...",
+      "suggested-tags": "Foreslåtte tagger",
+      "add-all": "Legg til alle",
+      "no-suggestions": "Ingen taggerforslag funnet",
+      "timeout": "Tagger-anbefaling har utløpt. Vennligst prøv igjen.",
+      "error": "Kunne ikke hente tagger-anbefalinger"
+    }
   },
   "filters": {
     "has-code": "harKode",
