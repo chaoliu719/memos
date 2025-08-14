@@ -114,7 +114,17 @@
     "add-your-comment-here": "Adicione seu comentário aqui…",
     "any-thoughts": "Alguma ideia…",
     "save": "Salvar",
-    "no-changes-detected": "Nenhuma alteração detectada"
+    "no-changes-detected": "Nenhuma alteração detectada",
+    "tag-recommend": {
+      "tooltip": "Recomendar tags",
+      "too-short": "Conteúdo muito curto (mínimo 15 caracteres)",
+      "loading": "Carregando recomendações...",
+      "suggested-tags": "Tags sugeridas",
+      "add-all": "Adicionar tudo",
+      "no-suggestions": "Nenhuma sugestão de tag encontrada",
+      "timeout": "Tempo limite de recomendação de tags esgotado. Tente novamente.",
+      "error": "Falha ao obter recomendações de tags"
+    }
   },
   "filters": {
     "has-code": "temCódigo",

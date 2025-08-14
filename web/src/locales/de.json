@@ -98,7 +98,17 @@
     "add-your-comment-here": "Füge deinen Kommentar hinzu...",
     "any-thoughts": "Ein Gedanke...",
     "no-changes-detected": "Keine Änderungen erkannt",
-    "save": "Speichern"
+    "save": "Speichern",
+    "tag-recommend": {
+      "tooltip": "Tags empfehlen",
+      "too-short": "Inhalt zu kurz (mindestens 15 Zeichen)",
+      "loading": "Lade Empfehlungen...",
+      "suggested-tags": "Vorgeschlagene Tags",
+      "add-all": "Alle hinzufügen",
+      "no-suggestions": "Keine Tag-Vorschläge gefunden",
+      "timeout": "Tag-Empfehlung ist abgelaufen. Bitte versuchen Sie es erneut.",
+      "error": "Fehler beim Abrufen der Tag-Empfehlungen"
+    }
   },
   "filters": {
     "has-code": "hatCode",

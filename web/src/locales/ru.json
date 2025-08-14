@@ -104,7 +104,17 @@
     "add-your-comment-here": "Напишите свой комметарий...",
     "any-thoughts": "Напишите что-нибудь...",
     "no-changes-detected": "Изменений не обнаружено",
-    "save": "Сохранить"
+    "save": "Сохранить",
+    "tag-recommend": {
+      "tooltip": "Рекомендовать теги",
+      "too-short": "Содержимое слишком короткое (минимум 15 символов)",
+      "loading": "Загрузка рекомендаций...",
+      "suggested-tags": "Предлагаемые теги",
+      "add-all": "Добавить все",
+      "no-suggestions": "Рекомендации тегов не найдены",
+      "timeout": "Время ожидания рекомендации тегов истекло. Попробуйте снова.",
+      "error": "Не удалось получить рекомендации тегов"
+    }
   },
   "inbox": {
     "memo-comment": "{{user}} добавил комментарий к вашей заметке {{memo}}.",
@@ -119,13 +129,10 @@
     "archived-at": "В архиве",
     "click-to-show-nsfw-content": "Нажмите, чтобы посмотреть",
     "comment": {
-      "self": "Комментарии"
-    },
-    "code": "Код",
-    "comment": {
       "self": "Комментарии",
       "write-a-comment": "Добавить комментарий"
     },
+    "code": "Код",
     "copy-link": "Скопировать ссылку",
     "count-memos-in-date": "{{count}} {{memos}} за {{date}}",
     "delete-confirm": "Вы уверены, что хотите удалить эту запись?\nЭТО ДЕЙСТВИЕ НЕЛЬЗЯ ОТМЕНИТЬ!",
@@ -383,14 +390,14 @@
       "url": "Ссылка"
     },
     "workspace-section": {
-        "disallow-change-nickname": "Запретить смену псевдонима",
-        "disallow-change-username": "Запретить смену имени пользователя",
-        "disallow-password-auth": "Запретить вход по паролю",
-        "disallow-user-registration": "Запретить регистрацию пользователей",
-        "monday": "Понедельник",
-        "saturday": "Суббота",
-        "sunday": "Воскресенье",
-        "week-start-day": "Начало недели"
+      "disallow-change-nickname": "Запретить смену псевдонима",
+      "disallow-change-username": "Запретить смену имени пользователя",
+      "disallow-password-auth": "Запретить вход по паролю",
+      "disallow-user-registration": "Запретить регистрацию пользователей",
+      "monday": "Понедельник",
+      "saturday": "Суббота",
+      "sunday": "Воскресенье",
+      "week-start-day": "Начало недели"
     }
   },
   "tag": {

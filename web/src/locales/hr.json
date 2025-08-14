@@ -114,7 +114,17 @@
     "add-your-comment-here": "Dodaj svoj komentar ovdje...",
     "any-thoughts": "Imaš li misli...",
     "save": "Sačuvaj",
-    "no-changes-detected": "Nema promjena"
+    "no-changes-detected": "Nema promjena",
+    "tag-recommend": {
+      "tooltip": "Preporuči oznake",
+      "too-short": "Sadržaj prekratak (minimum 15 znakova)",
+      "loading": "Učitavanje preporuka...",
+      "suggested-tags": "Predložene oznake",
+      "add-all": "Dodaj sve",
+      "no-suggestions": "Nisu pronađene preporuke oznaka",
+      "timeout": "Preporuka oznaka je istekla. Molimo pokušajte ponovo.",
+      "error": "Neuspješno dohvaćanje preporuka oznaka"
+    }
   },
   "filters": {
     "has-code": "imaKod",

@@ -114,7 +114,17 @@
     "add-your-comment-here": "在這裡添加您的評論...",
     "any-thoughts": "任何想法...",
     "save": "儲存",
-    "no-changes-detected": "未檢測到變更"
+    "no-changes-detected": "未檢測到變更",
+    "tag-recommend": {
+      "tooltip": "推薦標籤",
+      "too-short": "內容太短（至少15個字符）",
+      "loading": "正在載入推薦...",
+      "suggested-tags": "推薦標籤",
+      "add-all": "新增全部",
+      "no-suggestions": "未找到標籤推薦",
+      "timeout": "標籤推薦逾時，請重試",
+      "error": "獲取標籤推薦失敗"
+    }
   },
   "filters": {
     "has-code": "有程式碼",

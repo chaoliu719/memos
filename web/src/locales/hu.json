@@ -114,7 +114,17 @@
     "add-your-comment-here": "Írd ide a megjegyzésed...",
     "any-thoughts": "Bármi ami a fejedben jár...",
     "save": "Mentés",
-    "no-changes-detected": "Nincs változás"
+    "no-changes-detected": "Nincs változás",
+    "tag-recommend": {
+      "tooltip": "Címkék ajánlása",
+      "too-short": "A tartalom túl rövid (legalább 15 karakter)",
+      "loading": "Javaslatok betöltése...",
+      "suggested-tags": "Javasolt címkék",
+      "add-all": "Összes hozzáadása",
+      "no-suggestions": "Nem találhatók címke javaslatok",
+      "timeout": "A címke ajánlás időtúllépést ért el. Kérjük, próbálja újra.",
+      "error": "Nem sikerült lekérni a címke javaslatokat"
+    }
   },
   "filters": {
     "has-code": "vanKód",

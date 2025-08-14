@@ -113,7 +113,17 @@
     "add-your-comment-here": "Přidejte sem svůj komentář...",
     "any-thoughts": "Jakékoli myšlenky...",
     "save": "Uložit",
-    "no-changes-detected": "Nebyly zjištěny žádné změny"
+    "no-changes-detected": "Nebyly zjištěny žádné změny",
+    "tag-recommend": {
+      "tooltip": "Doporučit štítky",
+      "too-short": "Obsah příliš krátký (minimálně 15 znaků)",
+      "loading": "Načítání doporučení...",
+      "suggested-tags": "Navrhované štítky",
+      "add-all": "Přidat vše",
+      "no-suggestions": "Žádné návrhy štítků nebyly nalezeny",
+      "timeout": "Doporučení štítků vypršelo. Zkuste to znovu.",
+      "error": "Nepodařilo se získat doporučení štítků"
+    }
   },
   "filters": {
     "has-code": "hasCode",

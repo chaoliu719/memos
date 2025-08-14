@@ -114,7 +114,17 @@
     "add-your-comment-here": "Aggiungi qui il tuo commento...",
     "any-thoughts": "Qualsiasi cosa pensi...",
     "save": "Salva",
-    "no-changes-detected": "Nessuna modifica rilevata"
+    "no-changes-detected": "Nessuna modifica rilevata",
+    "tag-recommend": {
+      "tooltip": "Raccomanda tag",
+      "too-short": "Contenuto troppo breve (minimo 15 caratteri)",
+      "loading": "Caricamento raccomandazioni...",
+      "suggested-tags": "Tag suggeriti",
+      "add-all": "Aggiungi tutto",
+      "no-suggestions": "Nessun suggerimento di tag trovato",
+      "timeout": "Timeout della raccomandazione tag. Riprova.",
+      "error": "Impossibile ottenere raccomandazioni di tag"
+    }
   },
   "filters": {
     "has-code": "haCodice",

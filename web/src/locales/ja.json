@@ -114,7 +114,17 @@
     "add-your-comment-here": "ここにコメントを追加...",
     "any-thoughts": "今思ったことは...",
     "save": "保存",
-    "no-changes-detected": "変更はありません"
+    "no-changes-detected": "変更はありません",
+    "tag-recommend": {
+      "tooltip": "タグを推薦",
+      "too-short": "コンテンツが短すぎます（最低15文字）",
+      "loading": "推薦を読み込み中...",
+      "suggested-tags": "推薦タグ",
+      "add-all": "すべて追加",
+      "no-suggestions": "タグの推薦が見つかりません",
+      "timeout": "タグ推薦がタイムアウトしました。もう一度お試しください。",
+      "error": "タグ推薦の取得に失敗しました"
+    }
   },
   "filters": {
     "has-code": "コードあり",

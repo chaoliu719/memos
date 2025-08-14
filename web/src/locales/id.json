@@ -114,7 +114,17 @@
     "add-your-comment-here": "Tambahkan komentar Anda di sini...",
     "any-thoughts": "Punya pemikiran...",
     "save": "Simpan",
-    "no-changes-detected": "Tidak ada perubahan yang terdeteksi"
+    "no-changes-detected": "Tidak ada perubahan yang terdeteksi",
+    "tag-recommend": {
+      "tooltip": "Sarankan tag",
+      "too-short": "Konten terlalu pendek (minimal 15 karakter)",
+      "loading": "Memuat saran...",
+      "suggested-tags": "Tag yang disarankan",
+      "add-all": "Tambah semua",
+      "no-suggestions": "Tidak ditemukan saran tag",
+      "timeout": "Saran tag kehabisan waktu. Silakan coba lagi.",
+      "error": "Gagal mendapatkan saran tag"
+    }
   },
   "filters": {
     "has-code": "Memiliki kode",

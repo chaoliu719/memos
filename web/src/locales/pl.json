@@ -114,7 +114,17 @@
     "add-your-comment-here": "Dodaj swój komentarz tutaj...",
     "any-thoughts": "Jakieś przemyślenia...",
     "save": "Zapisz",
-    "no-changes-detected": "Brak wykrytych zmian"
+    "no-changes-detected": "Brak wykrytych zmian",
+    "tag-recommend": {
+      "tooltip": "Rekomenduj tagi",
+      "too-short": "Treść zbyt krótka (minimum 15 znaków)",
+      "loading": "Ładowanie rekomendacji...",
+      "suggested-tags": "Sugerowane tagi",
+      "add-all": "Dodaj wszystkie",
+      "no-suggestions": "Nie znaleziono sugestii tagów",
+      "timeout": "Przekroczono czas oczekiwania na rekomendacje tagów. Spróbuj ponownie.",
+      "error": "Nie udało się uzyskać rekomendacji tagów"
+    }
   },
   "filters": {
     "has-code": "maKod",

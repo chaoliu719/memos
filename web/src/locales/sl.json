@@ -114,7 +114,17 @@
     "add-your-comment-here": "Tu dodaj svoj komentar...",
     "any-thoughts": "Kakšne misli...",
     "save": "Shrani",
-    "no-changes-detected": "Ni zaznanih sprememb"
+    "no-changes-detected": "Ni zaznanih sprememb",
+    "tag-recommend": {
+      "tooltip": "Priporoči značke",
+      "too-short": "Vsebina prekratka (najmanj 15 znakov)",
+      "loading": "Nalaganje priporočil...",
+      "suggested-tags": "Predlagane značke",
+      "add-all": "Dodaj vse",
+      "no-suggestions": "Ni najdenih predlogov značk",
+      "timeout": "Priporočilo značk je poteklo. Prosimo, poskusite znova.",
+      "error": "Neuspešno pridobivanje priporočil značk"
+    }
   },
   "filters": {
     "has-code": "imaKodo",
