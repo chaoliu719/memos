@@ -1164,6 +1164,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/v1/memos:suggest-tags:
+        post:
+            tags:
+                - MemoService
+            description: SuggestMemoTags suggests tags for memo content.
+            operationId: MemoService_SuggestMemoTags
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SuggestMemoTagsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuggestMemoTagsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/v1/reactions/{reaction}:
         delete:
             tags:
@@ -3392,6 +3417,27 @@ components:
             properties:
                 content:
                     type: string
+        SuggestMemoTagsRequest:
+            required:
+                - content
+            type: object
+            properties:
+                content:
+                    type: string
+                    description: Required. The content of the memo for tag suggestion.
+                existingTags:
+                    type: array
+                    items:
+                        type: string
+                    description: Optional. The existing tags for the memo.
+        SuggestMemoTagsResponse:
+            type: object
+            properties:
+                suggestedTags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TagSuggestion'
+                    description: The suggested tags with reasons for the memo.
         SuperscriptNode:
             type: object
             properties:
@@ -3424,6 +3470,18 @@ components:
             properties:
                 content:
                     type: string
+        TagSuggestion:
+            required:
+                - tag
+                - reason
+            type: object
+            properties:
+                tag:
+                    type: string
+                    description: The suggested tag name.
+                reason:
+                    type: string
+                    description: The reason why this tag is recommended.
         TaskListItemNode:
             type: object
             properties:
