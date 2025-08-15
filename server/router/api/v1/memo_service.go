@@ -904,7 +904,19 @@ func (s *APIV1Service) SuggestMemoTags(ctx context.Context, request *v1pb.Sugges
 	}
 
 	// Try AI-based recommendation first
-	aiConfig := ai.LoadConfigFromEnv()
+	// Load AI configuration from database first, fallback to environment variables
+	aiSetting, err := s.Store.GetWorkspaceAISetting(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get AI setting: %v", err)
+	}
+	
+	aiConfig := ai.LoadConfigFromDatabase(aiSetting)
+	if !aiConfig.IsConfigured() {
+		// Fallback to environment variables if database config is not complete
+		envConfig := ai.LoadConfigFromEnv()
+		aiConfig = aiConfig.MergeWithEnv(envConfig)
+	}
+	
 	if aiConfig.IsConfigured() {
 		aiClient, err := ai.NewClient(aiConfig)
 		if err != nil {

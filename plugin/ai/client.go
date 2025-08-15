@@ -5,11 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
+	
+	storepb "github.com/usememos/memos/proto/gen/store"
 )
 
 // Common AI errors
@@ -25,23 +28,92 @@ var (
 
 // Config holds AI configuration
 type Config struct {
-	BaseURL string
-	APIKey  string
-	Model   string
+	Enabled        bool
+	BaseURL        string
+	APIKey         string
+	Model          string
+	TimeoutSeconds int
 }
 
 // LoadConfigFromEnv loads AI configuration from environment variables
 func LoadConfigFromEnv() *Config {
-	return &Config{
-		BaseURL: os.Getenv("AI_BASE_URL"),
-		APIKey:  os.Getenv("AI_API_KEY"),
-		Model:   os.Getenv("AI_MODEL"),
+	timeoutSeconds := 10 // default timeout
+	if timeoutStr := os.Getenv("AI_TIMEOUT_SECONDS"); timeoutStr != "" {
+		if timeout, err := strconv.Atoi(timeoutStr); err == nil && timeout > 0 {
+			timeoutSeconds = timeout
+		}
 	}
+
+	config := &Config{
+		BaseURL:        os.Getenv("AI_BASE_URL"),
+		APIKey:         os.Getenv("AI_API_KEY"),
+		Model:          os.Getenv("AI_MODEL"),
+		TimeoutSeconds: timeoutSeconds,
+	}
+
+	// Enable AI if all required fields are provided
+	config.Enabled = config.BaseURL != "" && config.APIKey != "" && config.Model != ""
+	
+	return config
+}
+
+// LoadConfigFromDatabase loads AI configuration from database settings
+func LoadConfigFromDatabase(aiSetting *storepb.WorkspaceAISetting) *Config {
+	if aiSetting == nil {
+		return &Config{Enabled: false}
+	}
+
+	timeoutSeconds := int(aiSetting.TimeoutSeconds)
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 10 // default timeout
+	}
+
+	return &Config{
+		Enabled:        aiSetting.EnableAi,
+		BaseURL:        aiSetting.BaseUrl,
+		APIKey:         aiSetting.ApiKey,
+		Model:          aiSetting.Model,
+		TimeoutSeconds: timeoutSeconds,
+	}
+}
+
+// MergeWithEnv merges database config with environment variables
+// Environment variables take precedence if they are set
+func (c *Config) MergeWithEnv() *Config {
+	envConfig := LoadConfigFromEnv()
+	
+	// Start with current config
+	merged := &Config{
+		Enabled:        c.Enabled,
+		BaseURL:        c.BaseURL,
+		APIKey:         c.APIKey,
+		Model:          c.Model,
+		TimeoutSeconds: c.TimeoutSeconds,
+	}
+	
+	// Override with env vars if they are set
+	if envConfig.BaseURL != "" {
+		merged.BaseURL = envConfig.BaseURL
+	}
+	if envConfig.APIKey != "" {
+		merged.APIKey = envConfig.APIKey
+	}
+	if envConfig.Model != "" {
+		merged.Model = envConfig.Model
+	}
+	if os.Getenv("AI_TIMEOUT_SECONDS") != "" {
+		merged.TimeoutSeconds = envConfig.TimeoutSeconds
+	}
+	
+	// Enable if all required fields are present
+	merged.Enabled = merged.BaseURL != "" && merged.APIKey != "" && merged.Model != ""
+	
+	return merged
 }
 
 // IsConfigured returns true if AI is properly configured
 func (c *Config) IsConfigured() bool {
-	return c.BaseURL != "" && c.APIKey != "" && c.Model != ""
+	return c.Enabled && c.BaseURL != "" && c.APIKey != "" && c.Model != ""
 }
 
 // Client wraps OpenAI client with convenience methods
@@ -125,7 +197,12 @@ func (c *Client) Chat(ctx context.Context, req *ChatRequest) (*ChatResponse, err
 		req.Temperature = 0.3
 	}
 	if req.Timeout == 0 {
-		req.Timeout = 10 * time.Second
+		// Use timeout from config if available
+		if c.config.TimeoutSeconds > 0 {
+			req.Timeout = time.Duration(c.config.TimeoutSeconds) * time.Second
+		} else {
+			req.Timeout = 10 * time.Second
+		}
 	}
 
 	model := c.config.Model

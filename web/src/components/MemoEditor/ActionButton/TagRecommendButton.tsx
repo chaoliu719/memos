@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { memoServiceClient } from "@/grpcweb";
+import { workspaceStore } from "@/store";
 import { useTranslate } from "@/utils/i18n";
 import { EditorRefActions } from "../Editor";
 
@@ -30,9 +31,12 @@ const TagRecommendButton = (props: Props) => {
 
     setIsLoading(true);
 
+    // Get timeout from AI settings (in milliseconds)
+    const timeoutMs = (workspaceStore.state.aiSetting.timeoutSeconds || 15) * 1000;
+    
     // Create timeout promise
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("timeout")), 15000); // 15 seconds timeout
+      setTimeout(() => reject(new Error("timeout")), timeoutMs);
     });
 
     try {
