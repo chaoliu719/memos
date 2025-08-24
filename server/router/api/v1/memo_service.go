@@ -103,6 +103,20 @@ func (s *APIV1Service) CreateMemo(ctx context.Context, request *v1pb.CreateMemoR
 		create.Payload.Location = convertLocationToStore(request.Memo.Location)
 	}
 
+	// Handle display_time if specified
+	if request.Memo.DisplayTime != nil {
+		displayTs := request.Memo.DisplayTime.AsTime().Unix()
+		memoRelatedSetting, err := s.Store.GetWorkspaceMemoRelatedSetting(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get workspace memo related setting")
+		}
+		if memoRelatedSetting.DisplayWithUpdateTime {
+			create.UpdatedTs = displayTs
+		} else {
+			create.CreatedTs = displayTs
+		}
+	}
+
 	memo, err := s.Store.CreateMemo(ctx, create)
 	if err != nil {
 		return nil, err
