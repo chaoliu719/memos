@@ -385,7 +385,9 @@ message DeleteMemoTagRequest {
   // Required. The tag name to delete.
   string tag = 2 [(google.api.field_behavior) = REQUIRED];
 
-  // Optional. Whether to delete related memos.
+  // Optional. Whether to delete related memos entirely.
+  // If true: delete the entire memo
+  // If false: only remove the tag from memo content (default)
   bool delete_related_memos = 3 [(google.api.field_behavior) = OPTIONAL];
 }
 

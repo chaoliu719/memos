@@ -826,13 +826,36 @@ func (s *APIV1Service) DeleteMemoTag(ctx context.Context, request *v1pb.DeleteMe
 				return nil, status.Errorf(codes.Internal, "failed to delete memo")
 			}
 		} else {
-			archived := store.Archived
-			err := s.Store.UpdateMemo(ctx, &store.UpdateMemo{
-				ID:        memo.ID,
-				RowStatus: &archived,
-			})
+			// Get full memo content for tag removal
+			fullMemo, err := s.Store.GetMemo(ctx, &store.FindMemo{ID: &memo.ID})
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to update memo")
+				return nil, status.Errorf(codes.Internal, "failed to get memo")
+			}
+			
+			// Parse memo content into AST
+			nodes, err := parser.Parse(tokenizer.Tokenize(fullMemo.Content))
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to parse memo: %v", err)
+			}
+			
+			// Remove the specified tag from AST nodes with smart whitespace handling
+			filteredNodes := s.filterOutTag(nodes, request.Tag)
+			
+			// Restore content from modified AST
+			fullMemo.Content = restore.Restore(filteredNodes)
+			
+			// Rebuild memo payload with updated content
+			if err := memopayload.RebuildMemoPayload(fullMemo); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to rebuild memo payload: %v", err)
+			}
+			
+			// Update memo with new content
+			if err := s.Store.UpdateMemo(ctx, &store.UpdateMemo{
+				ID:      fullMemo.ID,
+				Content: &fullMemo.Content,
+				Payload: fullMemo.Payload,
+			}); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to update memo: %v", err)
 			}
 		}
 	}
@@ -1093,4 +1116,78 @@ func (s *APIV1Service) SuggestMemoTags(ctx context.Context, request *v1pb.Sugges
 	return &v1pb.SuggestMemoTagsResponse{
 		SuggestedTags: []*v1pb.TagSuggestion{},
 	}, nil
+}
+
+// filterOutTag recursively filters out nodes matching the specified tag with smart whitespace handling
+func (s *APIV1Service) filterOutTag(nodes []ast.Node, tagToRemove string) []ast.Node {
+	var filtered []ast.Node
+	
+	for i, node := range nodes {
+		// Skip tags that match the removal criteria
+		if tag, ok := node.(*ast.Tag); ok && tag.Content == tagToRemove {
+			// Smart whitespace handling: if we're removing a tag, check adjacent text nodes
+			s.handleWhitespaceAroundRemovedTag(nodes, i, &filtered)
+			continue
+		}
+		
+		// For container nodes, recursively filter their children
+		switch n := node.(type) {
+		case *ast.Paragraph:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.Heading:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.Blockquote:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.List:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.OrderedListItem:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.UnorderedListItem:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.TaskListItem:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		case *ast.Bold:
+			n.Children = s.filterOutTag(n.Children, tagToRemove)
+		}
+		
+		filtered = append(filtered, node)
+	}
+	
+	return filtered
+}
+
+// handleWhitespaceAroundRemovedTag handles whitespace cleanup when a tag is removed
+func (s *APIV1Service) handleWhitespaceAroundRemovedTag(nodes []ast.Node, removedIndex int, filtered *[]ast.Node) {
+	// Check if previous node is text with trailing space
+	var prevHasTrailingSpace bool
+	if removedIndex > 0 {
+		if prevText, ok := nodes[removedIndex-1].(*ast.Text); ok {
+			if len(prevText.Content) > 0 && prevText.Content[len(prevText.Content)-1] == ' ' {
+				prevHasTrailingSpace = true
+			}
+		}
+	}
+	
+	// Check if next node is text with leading space
+	var nextHasLeadingSpace bool
+	if removedIndex < len(nodes)-1 {
+		if nextText, ok := nodes[removedIndex+1].(*ast.Text); ok {
+			if len(nextText.Content) > 0 && nextText.Content[0] == ' ' {
+				nextHasLeadingSpace = true
+			}
+		}
+	}
+	
+	// If both adjacent nodes have spaces, remove one space from the next node
+	if prevHasTrailingSpace && nextHasLeadingSpace && removedIndex < len(nodes)-1 {
+		if nextText, ok := nodes[removedIndex+1].(*ast.Text); ok {
+			// Remove leading space from next text node
+			nextText.Content = nextText.Content[1:]
+			// If the text node becomes empty after removing space, don't add it
+			if nextText.Content == "" {
+				// Skip the next node as well since it's now empty
+				return
+			}
+		}
+	}
 }
