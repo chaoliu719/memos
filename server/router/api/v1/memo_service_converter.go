@@ -26,14 +26,18 @@ func (s *APIV1Service) convertMemoFromStore(ctx context.Context, memo *store.Mem
 		displayTs = memo.UpdatedTs
 	}
 
+	createTime := time.Unix(memo.CreatedTs, 0)
+	updateTime := time.Unix(memo.UpdatedTs, 0)
+	displayTime := time.Unix(displayTs, 0)
+
 	name := fmt.Sprintf("%s%s", MemoNamePrefix, memo.UID)
 	memoMessage := &v1pb.Memo{
 		Name:        name,
 		State:       convertStateFromStore(memo.RowStatus),
 		Creator:     fmt.Sprintf("%s%d", UserNamePrefix, memo.CreatorID),
-		CreateTime:  timestamppb.New(time.Unix(memo.CreatedTs, 0)),
-		UpdateTime:  timestamppb.New(time.Unix(memo.UpdatedTs, 0)),
-		DisplayTime: timestamppb.New(time.Unix(displayTs, 0)),
+		CreateTime:  timestamppb.New(createTime),
+		UpdateTime:  timestamppb.New(updateTime),
+		DisplayTime: timestamppb.New(displayTime),
 		Content:     memo.Content,
 		Visibility:  convertVisibilityFromStore(memo.Visibility),
 		Pinned:      memo.Pinned,
